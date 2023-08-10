@@ -9,7 +9,12 @@ func (v Value) String() (string, error) {
 	if v.Data == nil {
 		return "", ErrValueIsNil
 	}
-	return fmt.Sprintf("%v", v.Data), nil
+	switch typed := v.Data.(type) {
+	case rune:
+		return string(typed), nil
+	default:
+		return fmt.Sprintf("%v", v.Data), nil
+	}
 }
 
 func (v Value) ListString(sep string) ([]string, error) {
