@@ -1,0 +1,46 @@
+func (v Value) {{.Name}}() ({{.Datatype}}, error) {
+	if v.Data == nil {
+		return {{.Default}}, ErrValueIsNil
+	}
+	switch typed := v.Data.(type) {
+	case {{.Datatype}}:
+		return typed, nil
+	{{ range .NativeConverts -}}
+	case {{.}}:
+		return {{$.Datatype}}(typed), nil
+	{{ end -}}
+	case string:
+		{{ if hasPrefix .Datatype "int" -}}
+		parsed, err := strconv.ParseInt(typed, 10, {{.Bitsize}})
+		{{ else if hasPrefix .Datatype "uint" -}}
+		parsed, err := strconv.ParseUint(typed, 10, {{.Bitsize}})
+		{{ else if hasPrefix .Datatype "float" -}}
+		parsed, err := strconv.ParseFloat(typed, {{.Bitsize}})
+		{{ end -}}
+		if err != nil {
+			return {{.Default}}, fmt.Errorf("dataparse: error parsing %q as {{.Name}}: %w", typed, err)
+		}
+		return {{.Datatype}}(parsed), nil
+	default:
+		return {{.Default}}, NewErrUnhandled(typed)
+	}
+}
+
+func (v Value) List{{.Name}}() ([]{{.Datatype}}, error) {
+	// TODO
+	return []{{.Datatype}}{ {{.Default}} }, nil
+}
+
+func (v Value) Must{{.Name}}() {{.Datatype}} {
+	if val, err := v.{{.Name}}(); err == nil {
+		return val
+	}
+	return {{.Default}}
+}
+
+func (v Value) MustList{{.Name}}() []{{.Datatype}} {
+	if val, err := v.List{{.Name}}(); err == nil {
+		return val
+	}
+	return []{{.Datatype}}{ {{.Default}} }
+}
