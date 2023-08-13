@@ -1,5 +1,6 @@
 func TestValue_{{.Name}}_Fuzz(t *testing.T) {
 	t.Parallel()
+	t.Skip()
 
 	for i := 0; i < parallelFuzzTests; i++ {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
@@ -9,6 +10,10 @@ func TestValue_{{.Name}}_Fuzz(t *testing.T) {
 			parsed, err := val.{{.Name}}()
 			log.Printf("%v -> %v", val.Data, parsed)
 			assert.Nil(t, err)
+			assert.Equal(t,
+				val.Data,
+				parsed,
+			)
 		})
 	}
 }

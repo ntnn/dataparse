@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 )
 
 func (v Value) Int() (int, error) {
@@ -37,6 +38,13 @@ func (v Value) Int() (int, error) {
 	case float64:
 		return int(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 64)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Int: %w", typed, err)
+			}
+			return int(parsed), nil
+		}
 		parsed, err := strconv.ParseInt(typed, 10, 64)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int: %w", typed, err)
@@ -108,6 +116,13 @@ func (v Value) Int8() (int8, error) {
 	case float64:
 		return int8(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 8)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Int8: %w", typed, err)
+			}
+			return int8(parsed), nil
+		}
 		parsed, err := strconv.ParseInt(typed, 10, 8)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int8: %w", typed, err)
@@ -179,6 +194,13 @@ func (v Value) Int16() (int16, error) {
 	case float64:
 		return int16(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 16)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Int16: %w", typed, err)
+			}
+			return int16(parsed), nil
+		}
 		parsed, err := strconv.ParseInt(typed, 10, 16)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int16: %w", typed, err)
@@ -250,6 +272,13 @@ func (v Value) Int32() (int32, error) {
 	case float64:
 		return int32(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 32)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Int32: %w", typed, err)
+			}
+			return int32(parsed), nil
+		}
 		parsed, err := strconv.ParseInt(typed, 10, 32)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int32: %w", typed, err)
@@ -321,6 +350,13 @@ func (v Value) Int64() (int64, error) {
 	case float64:
 		return int64(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 64)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Int64: %w", typed, err)
+			}
+			return int64(parsed), nil
+		}
 		parsed, err := strconv.ParseInt(typed, 10, 64)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int64: %w", typed, err)
@@ -392,6 +428,13 @@ func (v Value) Uint() (uint, error) {
 	case float64:
 		return uint(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 64)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Uint: %w", typed, err)
+			}
+			return uint(parsed), nil
+		}
 		parsed, err := strconv.ParseUint(typed, 10, 64)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint: %w", typed, err)
@@ -463,6 +506,13 @@ func (v Value) Uint8() (uint8, error) {
 	case float64:
 		return uint8(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 8)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Uint8: %w", typed, err)
+			}
+			return uint8(parsed), nil
+		}
 		parsed, err := strconv.ParseUint(typed, 10, 8)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint8: %w", typed, err)
@@ -534,6 +584,13 @@ func (v Value) Uint16() (uint16, error) {
 	case float64:
 		return uint16(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 16)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Uint16: %w", typed, err)
+			}
+			return uint16(parsed), nil
+		}
 		parsed, err := strconv.ParseUint(typed, 10, 16)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint16: %w", typed, err)
@@ -605,6 +662,13 @@ func (v Value) Uint32() (uint32, error) {
 	case float64:
 		return uint32(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 32)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Uint32: %w", typed, err)
+			}
+			return uint32(parsed), nil
+		}
 		parsed, err := strconv.ParseUint(typed, 10, 32)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint32: %w", typed, err)
@@ -676,6 +740,13 @@ func (v Value) Uint64() (uint64, error) {
 	case float64:
 		return uint64(typed), nil
 	case string:
+		if strings.Contains(typed, ".") {
+			parsed, err := strconv.ParseFloat(typed, 64)
+			if err != nil {
+				return 0, fmt.Errorf("dataparse: error parsing %q as Uint64: %w", typed, err)
+			}
+			return uint64(parsed), nil
+		}
 		parsed, err := strconv.ParseUint(typed, 10, 64)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint64: %w", typed, err)
