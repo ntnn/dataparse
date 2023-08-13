@@ -1,0 +1,14 @@
+func TestValue_{{.Name}}_Fuzz(t *testing.T) {
+	t.Parallel()
+
+	for i := 0; i < parallelFuzzTests; i++ {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			t.Parallel()
+			val := Value{}
+			fuzz.New().Fuzz(&val)
+			parsed, err := val.{{.Name}}()
+			log.Printf("%v -> %v", val.Data, parsed)
+			assert.Nil(t, err)
+		})
+	}
+}

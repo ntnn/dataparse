@@ -40,6 +40,11 @@ func (v Value) Int() (int, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int: %w", typed, err)
 		}
 		return int(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -99,6 +104,11 @@ func (v Value) Int8() (int8, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int8: %w", typed, err)
 		}
 		return int8(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -158,6 +168,11 @@ func (v Value) Int16() (int16, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int16: %w", typed, err)
 		}
 		return int16(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -217,6 +232,11 @@ func (v Value) Int32() (int32, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int32: %w", typed, err)
 		}
 		return int32(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -276,6 +296,11 @@ func (v Value) Int64() (int64, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Int64: %w", typed, err)
 		}
 		return int64(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -335,6 +360,11 @@ func (v Value) Uint() (uint, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint: %w", typed, err)
 		}
 		return uint(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -394,6 +424,11 @@ func (v Value) Uint8() (uint8, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint8: %w", typed, err)
 		}
 		return uint8(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -453,6 +488,11 @@ func (v Value) Uint16() (uint16, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint16: %w", typed, err)
 		}
 		return uint16(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -512,6 +552,11 @@ func (v Value) Uint32() (uint32, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint32: %w", typed, err)
 		}
 		return uint32(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -571,6 +616,11 @@ func (v Value) Uint64() (uint64, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Uint64: %w", typed, err)
 		}
 		return uint64(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -630,6 +680,11 @@ func (v Value) Float32() (float32, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Float32: %w", typed, err)
 		}
 		return float32(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}
@@ -689,6 +744,11 @@ func (v Value) Float64() (float64, error) {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Float64: %w", typed, err)
 		}
 		return float64(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return 0, NewErrUnhandled(typed)
 	}

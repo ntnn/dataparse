@@ -80,22 +80,43 @@ func (nd numberData) Default() string {
 }
 
 func numbers() error {
-	tmpl, err := makeTemplate("value_numbers.tmpl")
+	tmpl, err := makeTemplate("value_numbers.gotmpl")
 	if err != nil {
 		return err
 	}
 
-	f, err := os.Create("value_numbers.gen.go")
+	testTmpl, err := makeTemplate("value_numbers_test.gotmpl")
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	f.WriteString("package dataparse\n\n")
-	f.WriteString("import (\n")
-	f.WriteString("	\"fmt\"\n")
-	f.WriteString("	\"strconv\"\n")
-	f.WriteString(")\n\n")
+	gen, err := os.Create("value_numbers_gen.go")
+	if err != nil {
+		return err
+	}
+	defer gen.Close()
+
+	genTest, err := os.Create("value_numbers_gen_test.go")
+	if err != nil {
+		return err
+	}
+	defer genTest.Close()
+
+	gen.WriteString("package dataparse\n\n")
+	gen.WriteString("import (\n")
+	gen.WriteString("	\"fmt\"\n")
+	gen.WriteString("	\"strconv\"\n")
+	gen.WriteString(")\n\n")
+
+	genTest.WriteString("package dataparse\n\n")
+	genTest.WriteString("import (\n")
+	genTest.WriteString("	\"testing\"\n")
+	genTest.WriteString("	\"log\"\n")
+	genTest.WriteString("	\"fmt\"\n")
+	genTest.WriteString("\n")
+	genTest.WriteString("	fuzz \"github.com/google/gofuzz\"\n")
+	genTest.WriteString("	\"github.com/stretchr/testify/assert\"\n")
+	genTest.WriteString(")\n\n")
 
 	for _, data := range []numberData{
 		{
@@ -147,10 +168,15 @@ func numbers() error {
 			Bitsize: 64,
 		},
 	} {
-		if err := tmpl.Execute(f, data); err != nil {
+		if err := tmpl.Execute(gen, data); err != nil {
 			return err
 		}
-		f.WriteString("\n")
+		gen.WriteString("\n")
+
+		if err := testTmpl.Execute(genTest, data); err != nil {
+			return err
+		}
+		genTest.WriteString("\n")
 	}
 
 	return nil

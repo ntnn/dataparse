@@ -5,7 +5,7 @@ GOLINT = github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.0
 default: check
 
 generate:
-	find . -name '*.gen.go' -delete
+	find . \( -name '*_gen.go' -o -name '*_gen_test.go' \) -delete
 	$(GO) generate ./...
 
 check:
@@ -13,4 +13,4 @@ check:
 	$(GO) run $(GOLINT) run ./...
 
 test:
-	$(GO) test -v ./...
+	$(GO) test -parallel 8 -cover ./...

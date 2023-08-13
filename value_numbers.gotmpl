@@ -21,6 +21,11 @@ func (v Value) {{.Name}}() ({{.Datatype}}, error) {
 			return {{.Default}}, fmt.Errorf("dataparse: error parsing %q as {{.Name}}: %w", typed, err)
 		}
 		return {{.Datatype}}(parsed), nil
+	case bool:
+		if typed {
+			return 1, nil
+		}
+		return 0, nil
 	default:
 		return {{.Default}}, NewErrUnhandled(typed)
 	}
