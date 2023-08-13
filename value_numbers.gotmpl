@@ -26,6 +26,23 @@ func (v Value) {{.Name}}() ({{.Datatype}}, error) {
 			return 1, nil
 		}
 		return 0, nil
+	case []byte:
+		{{ if hasPrefix .Datatype "int" -}}
+		ret, numBytes := binary.Varint(typed)
+		{{ else if hasPrefix .Datatype "uint" -}}
+		ret, numBytes := binary.Uvarint(typed)
+		{{ else if hasPrefix .Datatype "float" -}}
+		ret, numBytes := binary.Uvarint(typed)
+		{{ end -}}
+		if numBytes <= 0 {
+			return {{.Default}}, fmt.Errorf("dataparse: error converting %v to {{.Name}}: %d",
+				typed, numBytes)
+		}
+		{{ if hasPrefix .Datatype "float" -}}
+		return math.Float{{.Bitsize}}frombits(uint{{.Bitsize}}(ret)), nil
+		{{ else -}}
+		return {{.Datatype}}(ret), nil
+		{{ end -}}
 	default:
 		return {{.Default}}, NewErrUnhandled(typed)
 	}

@@ -1,7 +1,9 @@
 package dataparse
 
 import (
+	"encoding/binary"
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -45,7 +47,14 @@ func (v Value) Int() (int, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Varint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Int: %d",
+				typed, numBytes)
+		}
+		return int(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -109,7 +118,14 @@ func (v Value) Int8() (int8, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Varint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Int8: %d",
+				typed, numBytes)
+		}
+		return int8(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -173,7 +189,14 @@ func (v Value) Int16() (int16, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Varint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Int16: %d",
+				typed, numBytes)
+		}
+		return int16(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -237,7 +260,14 @@ func (v Value) Int32() (int32, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Varint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Int32: %d",
+				typed, numBytes)
+		}
+		return int32(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -301,7 +331,14 @@ func (v Value) Int64() (int64, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Varint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Int64: %d",
+				typed, numBytes)
+		}
+		return int64(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -365,7 +402,14 @@ func (v Value) Uint() (uint, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Uvarint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Uint: %d",
+				typed, numBytes)
+		}
+		return uint(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -429,7 +473,14 @@ func (v Value) Uint8() (uint8, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Uvarint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Uint8: %d",
+				typed, numBytes)
+		}
+		return uint8(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -493,7 +544,14 @@ func (v Value) Uint16() (uint16, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Uvarint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Uint16: %d",
+				typed, numBytes)
+		}
+		return uint16(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -557,7 +615,14 @@ func (v Value) Uint32() (uint32, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Uvarint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Uint32: %d",
+				typed, numBytes)
+		}
+		return uint32(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -621,7 +686,14 @@ func (v Value) Uint64() (uint64, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Uvarint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Uint64: %d",
+				typed, numBytes)
+		}
+		return uint64(ret), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -685,7 +757,14 @@ func (v Value) Float32() (float32, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Uvarint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Float32: %d",
+				typed, numBytes)
+		}
+		return math.Float32frombits(uint32(ret)), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }
@@ -749,7 +828,14 @@ func (v Value) Float64() (float64, error) {
 			return 1, nil
 		}
 		return 0, nil
-	default:
+	case []byte:
+		ret, numBytes := binary.Uvarint(typed)
+		if numBytes <= 0 {
+			return 0, fmt.Errorf("dataparse: error converting %v to Float64: %d",
+				typed, numBytes)
+		}
+		return math.Float64frombits(uint64(ret)), nil
+		default:
 		return 0, NewErrUnhandled(typed)
 	}
 }

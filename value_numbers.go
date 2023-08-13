@@ -104,7 +104,9 @@ func numbers() error {
 
 	gen.WriteString("package dataparse\n\n")
 	gen.WriteString("import (\n")
+	gen.WriteString("	\"encoding/binary\"\n")
 	gen.WriteString("	\"fmt\"\n")
+	gen.WriteString("	\"math\"\n")
 	gen.WriteString("	\"strconv\"\n")
 	gen.WriteString(")\n\n")
 
