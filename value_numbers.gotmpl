@@ -12,7 +12,7 @@ func (v Value) {{.Name}}() ({{.Datatype}}, error) {
 	case string:
 		{{ if not (hasPrefix .Datatype "float") -}}
 		if strings.Contains(typed, ".") {
-			parsed, err := strconv.ParseFloat(typed, {{.Bitsize}})
+			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
 				return {{.Default}}, fmt.Errorf("dataparse: error parsing %q as {{.Name}}: %w", typed, err)
 			}

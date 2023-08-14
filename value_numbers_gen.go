@@ -117,7 +117,7 @@ func (v Value) Int8() (int8, error) {
 		return int8(typed), nil
 	case string:
 		if strings.Contains(typed, ".") {
-			parsed, err := strconv.ParseFloat(typed, 8)
+			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
 				return 0, fmt.Errorf("dataparse: error parsing %q as Int8: %w", typed, err)
 			}
@@ -195,7 +195,7 @@ func (v Value) Int16() (int16, error) {
 		return int16(typed), nil
 	case string:
 		if strings.Contains(typed, ".") {
-			parsed, err := strconv.ParseFloat(typed, 16)
+			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
 				return 0, fmt.Errorf("dataparse: error parsing %q as Int16: %w", typed, err)
 			}
@@ -273,7 +273,7 @@ func (v Value) Int32() (int32, error) {
 		return int32(typed), nil
 	case string:
 		if strings.Contains(typed, ".") {
-			parsed, err := strconv.ParseFloat(typed, 32)
+			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
 				return 0, fmt.Errorf("dataparse: error parsing %q as Int32: %w", typed, err)
 			}
@@ -507,7 +507,7 @@ func (v Value) Uint8() (uint8, error) {
 		return uint8(typed), nil
 	case string:
 		if strings.Contains(typed, ".") {
-			parsed, err := strconv.ParseFloat(typed, 8)
+			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
 				return 0, fmt.Errorf("dataparse: error parsing %q as Uint8: %w", typed, err)
 			}
@@ -585,7 +585,7 @@ func (v Value) Uint16() (uint16, error) {
 		return uint16(typed), nil
 	case string:
 		if strings.Contains(typed, ".") {
-			parsed, err := strconv.ParseFloat(typed, 16)
+			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
 				return 0, fmt.Errorf("dataparse: error parsing %q as Uint16: %w", typed, err)
 			}
@@ -663,7 +663,7 @@ func (v Value) Uint32() (uint32, error) {
 		return uint32(typed), nil
 	case string:
 		if strings.Contains(typed, ".") {
-			parsed, err := strconv.ParseFloat(typed, 32)
+			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
 				return 0, fmt.Errorf("dataparse: error parsing %q as Uint32: %w", typed, err)
 			}
