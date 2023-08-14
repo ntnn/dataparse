@@ -3,6 +3,7 @@ module github.com/ntnn/dataparse
 go 1.20
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.23.1
 	github.com/google/gofuzz v1.2.0
 	github.com/stretchr/testify v1.8.4
 )
