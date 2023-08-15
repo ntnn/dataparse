@@ -2,33 +2,32 @@ package dataparse
 
 type Map map[any]any
 
-func (m Map) Get(key any) (Value, bool) {
-	v, ok := m[key]
-	if ok {
-		return NewValue(v), true
+func (m Map) Get(keys ...any) (Value, bool) {
+	for _, key := range keys {
+		if v, ok := m[key]; ok {
+			return NewValue(v), true
+		}
 	}
 	return NewValue(nil), false
 }
 
-func (m Map) MustGet(key any) Value {
-	v, _ := m.Get(key)
+func (m Map) MustGet(keys ...any) Value {
+	v, _ := m.Get(keys...)
 	return v
 }
 
-func (m Map) Map(key any) (Map, bool) {
-	v, ok := m[key]
-	if ok {
-		if typed, ok := v.(map[any]any); ok {
-			return Map(typed), true
+func (m Map) Map(keys ...any) (Map, bool) {
+	for _, key := range keys {
+		if v, ok := m[key]; ok {
+			if typed, ok := v.(map[any]any); ok {
+				return Map(typed), true
+			}
 		}
 	}
-	return nil, false
+	return Map{}, false
 }
 
-func (m Map) MustMap(key any) Map {
-	v, ok := m.Map(key)
-	if ok {
-		return v
-	}
-	return Map{}
+func (m Map) MustMap(keys ...any) Map {
+	v, _ := m.Map(keys...)
+	return v
 }
