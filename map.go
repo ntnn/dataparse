@@ -1,14 +1,38 @@
 package dataparse
 
+import (
+	"fmt"
+	"reflect"
+)
+
 type Map map[any]any
 
-func (m Map) Get(keys ...any) (Value, bool) {
+func NewMap(in any) (Map, error) {
+	if in == nil {
+		return Map{}, ErrValueIsNil
+	}
+
+	val := reflect.ValueOf(in)
+	switch val.Kind() {
+	case reflect.Map:
+		m := Map{}
+		iter := val.MapRange()
+		for iter.Next() {
+			m[iter.Key().Interface()] = iter.Value().Interface()
+		}
+		return m, nil
+	default:
+		return Map{}, fmt.Errorf("dataparse: cannot be transformed to map: %T", in)
+	}
+}
+
+func (m Map) Get(keys ...any) (Value, error) {
 	for _, key := range keys {
 		if v, ok := m[key]; ok {
-			return NewValue(v), true
+			return NewValue(v), nil
 		}
 	}
-	return NewValue(nil), false
+	return NewValue(nil), fmt.Errorf("dataparse: no valid key: %v", keys)
 }
 
 func (m Map) MustGet(keys ...any) Value {
@@ -16,15 +40,13 @@ func (m Map) MustGet(keys ...any) Value {
 	return v
 }
 
-func (m Map) Map(keys ...any) (Map, bool) {
+func (m Map) Map(keys ...any) (Map, error) {
 	for _, key := range keys {
 		if v, ok := m[key]; ok {
-			if typed, ok := v.(map[any]any); ok {
-				return Map(typed), true
-			}
+			return NewMap(v)
 		}
 	}
-	return Map{}, false
+	return Map{}, fmt.Errorf("dataparse: no valid keys: %v", keys)
 }
 
 func (m Map) MustMap(keys ...any) Map {
