@@ -8,48 +8,35 @@ import (
 
 func TestValue_String(t *testing.T) {
 	// string to string
-	s, err := NewValue("test").String()
-	assert.Nil(t, err)
-	assert.Equal(t, "test", s)
+	assert.Equal(t, "test", NewValue("test").String())
 
 	// integer to string
-	s, err = NewValue(1).String()
-	assert.Nil(t, err)
-	assert.Equal(t, "1", s)
+	assert.Equal(t, "1", NewValue(1).String())
 
 	// negative integer to string
-	s, err = NewValue(-1).String()
-	assert.Nil(t, err)
-	assert.Equal(t, "-1", s)
+	assert.Equal(t, "-1", NewValue(-1).String())
 
 	// int8 to string
-	s, err = NewValue(int8(1)).String()
-	assert.Nil(t, err)
-	assert.Equal(t, "1", s)
+	assert.Equal(t, "1", NewValue(int8(1)).String())
 
 	// unsigned integer to string
-	s, err = NewValue(uint(1)).String()
-	assert.Nil(t, err)
-	assert.Equal(t, "1", s)
+	assert.Equal(t, "1", NewValue(uint(1)).String())
 
 	// uint8 to string
-	s, err = NewValue(uint8(1)).String()
-	assert.Nil(t, err)
-	assert.Equal(t, "1", s)
+	assert.Equal(t, "1", NewValue(uint8(1)).String())
 
 	// float to string
-	s, err = NewValue(1.0).String()
-	assert.Nil(t, err)
-	assert.Equal(t, "1", s)
+	assert.Equal(t, "1", NewValue(1.0).String())
 
-	s, err = NewValue(1.4).String()
-	assert.Nil(t, err)
-	assert.Equal(t, "1.4", s)
+	assert.Equal(t, "1.4", NewValue(1.4).String())
 
 	// rune to string
-	s, err = NewValue('c').String()
-	assert.Nil(t, err)
-	assert.Equal(t, "c", s)
+	assert.Equal(t, "c", NewValue('c').String())
+
+	assert.Equal(t,
+		"test string",
+		NewValue(any("test string")).String(),
+	)
 }
 
 func TestValue_ListString(t *testing.T) {
@@ -115,4 +102,14 @@ func TestValue_ListString(t *testing.T) {
 	s, err = NewValue('c').ListString(",")
 	assert.Nil(t, err)
 	assert.Equal(t, []string{"c"}, s)
+
+	// string slice to string slice
+	s, err = NewValue([]string{"test1", "test2", "test3"}).ListString(",")
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"test1", "test2", "test3"}, s)
+
+	// any slice to string slice
+	s, err = NewValue([]any{"test1", "test2", "test3"}).ListString(",")
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"test1", "test2", "test3"}, s)
 }

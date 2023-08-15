@@ -14,7 +14,7 @@ func TestNewMap(t *testing.T) {
 
 	m, err = NewMap(map[any]any{1: "test"})
 	require.Nil(t, err)
-	assert.Equal(t, "test", m.MustGet(1).MustString())
+	assert.Equal(t, "test", m.MustGet(1).String())
 
 	_, err = NewMap(nil)
 	require.NotNil(t, err)

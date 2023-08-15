@@ -2,37 +2,38 @@ package dataparse
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
-func (v Value) String() (string, error) {
-	if v.Data == nil {
-		return "", ErrValueIsNil
-	}
+func (v Value) String() string {
 	switch typed := v.Data.(type) {
 	case rune:
-		return string(typed), nil
+		return string(typed)
 	default:
-		return fmt.Sprintf("%v", v.Data), nil
+		return fmt.Sprintf("%v", v.Data)
 	}
 }
 
 func (v Value) ListString(sep string) ([]string, error) {
-	val, err := v.String()
-	if err != nil {
-		return nil, err
+	val := reflect.ValueOf(v.Data)
+	switch val.Kind() {
+	case reflect.Slice:
+		ret := make([]string, val.Len())
+		for i := 0; i < val.Len(); i++ {
+			elem := val.Index(i)
+			if elem.Kind() == reflect.Interface {
+				elem = elem.Elem()
+			}
+			ret[i] = elem.String()
+		}
+		return ret, nil
+	default:
+		return strings.Split(v.String(), sep), nil
 	}
-
-	return strings.Split(val, sep), nil
-}
-
-func (v Value) MustString() string {
-	return fmt.Sprintf("%v", v.Data)
 }
 
 func (v Value) MustListString(sep string) []string {
-	if val, err := v.ListString(sep); err == nil {
-		return val
-	}
-	return []string{}
+	val, _ := v.ListString(sep)
+	return val
 }
