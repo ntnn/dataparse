@@ -1,11 +1,46 @@
 package dataparse
 
 import (
+	"net"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestFromNDJSONFile(t *testing.T) {
+	maps, errs := FromNDJSONFile("./testdata/data.ndjson")
+	for err := range errs {
+		require.Nil(t, err)
+	}
+
+	m := <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, "Garrott", m.MustGet("first_name").String())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, "Vasovic", m.MustGet("last_name").String())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, 3, m.MustGet("id").MustInt())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t,
+		time.Date(2023, time.June, 20, 23, 34, 57, 0, time.UTC),
+		m.MustGet("timestamp").MustTime(),
+	)
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t,
+		net.ParseIP("166.215.142.79"),
+		m.MustGet("ip_address").MustIP(),
+	)
+}
 
 func TestNewMap(t *testing.T) {
 	// convert maps to Map
