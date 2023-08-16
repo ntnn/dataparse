@@ -13,12 +13,22 @@ func NewMap(in any) (Map, error) {
 	}
 
 	val := reflect.ValueOf(in)
+	if val.Kind() == reflect.Pointer {
+		val = val.Elem()
+	}
+
 	switch val.Kind() {
 	case reflect.Map:
 		m := Map{}
 		iter := val.MapRange()
 		for iter.Next() {
 			m[iter.Key().Interface()] = iter.Value().Interface()
+		}
+		return m, nil
+	case reflect.Struct:
+		m := Map{}
+		for i := 0; i < val.NumField(); i++ {
+			m[val.Type().Field(i).Name] = val.Field(i).Interface()
 		}
 		return m, nil
 	default:
