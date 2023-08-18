@@ -14,8 +14,8 @@ import (
 type Map map[any]any
 
 // From returns maps parsed from a file.
-func From(path string, opts ...ReadOption) (chan Map, chan error, error) {
-	cfg := newReadConfig(opts...)
+func From(path string, opts ...FromOption) (chan Map, chan error, error) {
+	cfg := newFromConfig(opts...)
 	defer cfg.Close()
 
 	reader, err := os.Open(path)
@@ -41,7 +41,7 @@ func From(path string, opts ...ReadOption) (chan Map, chan error, error) {
 		ext = filepath.Ext(filepath.Ext(path))
 	}
 
-	var fn func(cfg *ReadConfig) (chan Map, chan error)
+	var fn func(cfg *FromConfig) (chan Map, chan error)
 	switch ext {
 	case ".ndjson":
 		fn = fromNdjson
@@ -55,12 +55,12 @@ func From(path string, opts ...ReadOption) (chan Map, chan error, error) {
 
 // FromNDJSON returns maps parsed from a stream of newline delimited
 // JSON.
-func FromNDJSON(reader io.Reader, opts ...ReadOption) (chan Map, chan error) {
-	cfg := newReadConfig(opts...)
+func FromNDJSON(reader io.Reader, opts ...FromOption) (chan Map, chan error) {
+	cfg := newFromConfig(opts...)
 	return fromNdjson(cfg)
 }
 
-func fromNdjson(cfg *ReadConfig) (chan Map, chan error) {
+func fromNdjson(cfg *FromConfig) (chan Map, chan error) {
 	mapCh, errCh := cfg.channels()
 
 	decoder := json.NewDecoder(cfg.reader)

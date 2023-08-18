@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-type ReadConfig struct {
+type FromConfig struct {
 	channelSize    int
 	errChannelSize int
 
@@ -14,8 +14,8 @@ type ReadConfig struct {
 	closers []func() error
 }
 
-func newReadConfig(opts ...ReadOption) *ReadConfig {
-	cfg := &ReadConfig{
+func newFromConfig(opts ...FromOption) *FromConfig {
+	cfg := &FromConfig{
 		channelSize:    100,
 		errChannelSize: 1,
 		closers:        []func() error{},
@@ -28,11 +28,11 @@ func newReadConfig(opts ...ReadOption) *ReadConfig {
 	return cfg
 }
 
-func (cfg ReadConfig) channels() (chan Map, chan error) {
+func (cfg FromConfig) channels() (chan Map, chan error) {
 	return make(chan Map, cfg.channelSize), make(chan error, 1)
 }
 
-func (cfg ReadConfig) Close() error {
+func (cfg FromConfig) Close() error {
 	var retErr error
 	slices.Reverse(cfg.closers)
 	for _, closer := range cfg.closers {
@@ -43,16 +43,16 @@ func (cfg ReadConfig) Close() error {
 	return retErr
 }
 
-type ReadOption func(*ReadConfig)
+type FromOption func(*FromConfig)
 
-func WithChannelSize(i int) ReadOption {
-	return func(opt *ReadConfig) {
+func WithChannelSize(i int) FromOption {
+	return func(opt *FromConfig) {
 		opt.channelSize = i
 	}
 }
 
-func WithErrChannelSize(i int) ReadOption {
-	return func(opt *ReadConfig) {
+func WithErrChannelSize(i int) FromOption {
+	return func(opt *FromConfig) {
 		opt.errChannelSize = i
 	}
 }
