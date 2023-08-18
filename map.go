@@ -1,28 +1,74 @@
 package dataparse
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"reflect"
 )
 
 type Map map[any]any
 
+// From returns maps parsed from a file.
+func From(path string, opts ...ReadOption) (chan Map, chan error, error) {
+	cfg := newReadConfig(opts...)
+	defer cfg.Close()
+
+	reader, err := os.Open(path)
+	if err != nil {
+		return nil, nil, fmt.Errorf("dataparse: error opening file: %w", err)
+	}
+	cfg.reader = reader
+	cfg.closers = append(cfg.closers, reader.Close)
+
+	ext := filepath.Ext(path)
+
+	switch ext {
+	case ".gz":
+		gzReader, err := gzip.NewReader(reader)
+		if err != nil {
+			return nil, nil, fmt.Errorf("dataparse: error creating gzip reader: %w", err)
+		}
+		cfg.reader = gzReader
+		cfg.closers = append(cfg.closers, gzReader.Close)
+	}
+
+	if reader != cfg.reader {
+		ext = filepath.Ext(filepath.Ext(path))
+	}
+
+	var fn func(cfg *ReadConfig) (chan Map, chan error)
+	switch ext {
+	case ".ndjson":
+		fn = fromNdjson
+	default:
+		return nil, nil, fmt.Errorf("dataparse: unhandled file extension: %q", ext)
+	}
+
+	chMap, chErr := fn(cfg)
+	return chMap, chErr, nil
+}
+
 // FromNDJSON returns maps parsed from a stream of newline delimited
 // JSON.
 func FromNDJSON(reader io.Reader, opts ...ReadOption) (chan Map, chan error) {
 	cfg := newReadConfig(opts...)
+	return fromNdjson(cfg)
+}
+
+func fromNdjson(cfg *ReadConfig) (chan Map, chan error) {
 	mapCh, errCh := cfg.channels()
 
-	decoder := json.NewDecoder(reader)
+	decoder := json.NewDecoder(cfg.reader)
 
 	go func() {
+		defer cfg.Close()
 		defer close(mapCh)
 		defer close(errCh)
-		defer cfg.closeFinishChannel()
 
 		for decoder.More() {
 			// decoder refuses to decode into Map or map[any]any
@@ -38,29 +84,6 @@ func FromNDJSON(reader io.Reader, opts ...ReadOption) (chan Map, chan error) {
 			}
 			mapCh <- mMap
 		}
-	}()
-
-	return mapCh, errCh
-}
-
-// FromNDJSONFile returns maps parsed from a file containing newline
-// delimited JSON objects.
-func FromNDJSONFile(path string, opts ...ReadOption) (chan Map, chan error) {
-	f, err := os.Open(path)
-	if err != nil {
-		errCh := make(chan error, 1)
-		errCh <- err
-		close(errCh)
-		return nil, errCh
-	}
-
-	finishCh := make(chan struct{}, 1)
-	opts = append(opts, withFinishChannel(finishCh))
-	mapCh, errCh := FromNDJSON(f, opts...)
-
-	go func() {
-		<-finishCh
-		f.Close()
 	}()
 
 	return mapCh, errCh

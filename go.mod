@@ -5,6 +5,8 @@ go 1.21
 require (
 	github.com/brianvoe/gofakeit/v6 v6.23.1
 	github.com/google/gofuzz v1.2.0
+	github.com/k0kubun/pp/v3 v3.2.0
+	github.com/ntnn/magefiles v0.0.0-20230815005257-6d6ee99a4e10
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -88,7 +90,6 @@ require (
 	github.com/kisielk/errcheck v1.6.3 // indirect
 	github.com/kisielk/gotool v1.0.0 // indirect
 	github.com/kkHAIKE/contextcheck v1.1.4 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/kulti/thelper v0.6.3 // indirect
 	github.com/kunwardeep/paralleltest v1.0.8 // indirect
 	github.com/kyoh86/exportloopref v0.1.11 // indirect
@@ -112,10 +113,8 @@ require (
 	github.com/moricho/tparallel v0.3.1 // indirect
 	github.com/nakabonne/nestif v0.3.1 // indirect
 	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354 // indirect
-	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/nishanths/exhaustive v0.11.0 // indirect
 	github.com/nishanths/predeclared v0.2.2 // indirect
-	github.com/ntnn/magefiles v0.0.0-20230815005257-6d6ee99a4e10 // indirect
 	github.com/nunnatsa/ginkgolinter v0.13.3 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
@@ -180,7 +179,6 @@ require (
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/tools v0.12.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

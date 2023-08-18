@@ -10,7 +10,8 @@ import (
 )
 
 func TestFromNDJSONFile(t *testing.T) {
-	maps, errs := FromNDJSONFile("./testdata/data.ndjson")
+	maps, errs, err := From("./testdata/data.ndjson")
+	require.Nil(t, err)
 	for err := range errs {
 		require.Nil(t, err)
 	}
