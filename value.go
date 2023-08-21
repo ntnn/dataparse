@@ -12,6 +12,10 @@ func NewValue(data any) Value {
 
 //go:generate go run ./value_numbers.go
 
+func (v Value) IsNil() bool {
+	return v.Data == nil
+}
+
 func (v Value) List() ([]Value, error) {
 	switch reflect.TypeOf(v.Data).Kind() {
 	case reflect.Slice:
