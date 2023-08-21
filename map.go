@@ -163,6 +163,10 @@ func NewMap(in any) (Map, error) {
 	}
 }
 
+func (m Map) Has(keys ...any) bool {
+	return !m.MustGet(keys...).IsNil()
+}
+
 func (m Map) Get(keys ...any) (Value, error) {
 	for _, key := range keys {
 		if v, ok := m[key]; ok {
