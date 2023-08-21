@@ -9,8 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-
-	"github.com/k0kubun/pp/v3"
+	"strings"
 )
 
 type Map map[any]any
@@ -103,7 +102,6 @@ func fromJson(cfg *FromConfig) (chan Map, chan error) {
 				return
 			}
 			val := reflect.ValueOf(m)
-			pp.Println("kind", val.Kind())
 			switch val.Kind() {
 			case reflect.Slice:
 				for i := 0; i < val.Len(); i++ {
@@ -129,6 +127,39 @@ func fromJson(cfg *FromConfig) (chan Map, chan error) {
 	}()
 
 	return mapCh, errCh
+}
+
+// FromKVString returns a map based on the passed string.
+//
+// Example:
+//
+//	input: a=1,b=test,c
+//	output: {
+//		a: 1,
+//		b: "test",
+//		c: nil,
+//	}
+func FromKVString(kv string, opts ...FromOption) (Map, error) {
+	cfg := newFromConfig(opts...)
+
+	m := Map{}
+	for _, elem := range strings.Split(kv, cfg.separator) {
+		split := strings.SplitN(elem, "=", 2)
+
+		key := strings.TrimSpace(split[0])
+		var value any
+		if len(split) > 1 {
+			if cfg.trimSpace {
+				value = strings.TrimSpace(split[1])
+			} else {
+				value = split[1]
+			}
+		}
+
+		m[key] = value
+	}
+
+	return m, nil
 }
 
 func NewMap(in any) (Map, error) {

@@ -97,6 +97,20 @@ func TestFrom_Ndjson(t *testing.T) {
 	)
 }
 
+func TestFromKVString(t *testing.T) {
+	m, err := FromKVString("a=1,b=test,c,d=0x05")
+	require.Nil(t, err)
+
+	assert.Equal(t, 1, m.MustGet("a").MustInt())
+	assert.Equal(t, "test", m.MustGet("b").String())
+	assert.True(t, m.MustGet("c").IsNil())
+
+	m, err = FromKVString("key1=value1|key2=value2", WithSeparator("|"))
+	require.Nil(t, err)
+	assert.Equal(t, "value1", m.MustGet("key1").String())
+	assert.Equal(t, "value2", m.MustGet("key2").String())
+}
+
 func TestNewMap(t *testing.T) {
 	// convert maps to Map
 	m, err := NewMap(map[any]any{1: 1})
