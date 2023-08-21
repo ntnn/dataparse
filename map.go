@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+
+	"github.com/k0kubun/pp/v3"
 )
 
 type Map map[any]any
@@ -43,8 +45,8 @@ func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 
 	var fn func(cfg *FromConfig) (chan Map, chan error)
 	switch ext {
-	case ".ndjson":
-		fn = fromNdjson
+	case ".json", ".ndjson":
+		fn = fromJson
 	default:
 		return nil, nil, fmt.Errorf("dataparse: unhandled file extension: %q", ext)
 	}
@@ -53,14 +55,37 @@ func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 	return chMap, chErr, nil
 }
 
-// FromNDJSON returns maps parsed from a stream of newline delimited
-// JSON.
-func FromNDJSON(reader io.Reader, opts ...FromOption) (chan Map, chan error) {
-	cfg := newFromConfig(opts...)
-	return fromNdjson(cfg)
+// FromSingle is a wrapper around From and returns the first map and
+// error in the result set.
+// It is only intended for instances where it is already known that the
+// input can only contain a single document.
+func FromSingle(path string, opts ...FromOption) (Map, error) {
+	chMap, chErr, err := From(path, append(opts, WithChannelSize(1))...)
+	if err != nil {
+		return nil, err
+	}
+	return <-chMap, <-chErr
 }
 
-func fromNdjson(cfg *FromConfig) (chan Map, chan error) {
+// FromJson returns maps parsed from a stream which may consist of:
+// 1. A single JSON document
+// 2. A stream of JSON documents
+// 3. An array of JSON documents
+func FromJson(reader io.Reader, opts ...FromOption) (chan Map, chan error) {
+	cfg := newFromConfig(opts...)
+	return fromJson(cfg)
+}
+
+// FromJsonSingle is a wrapper around FromJson and returns the first map
+// and error in the result set.
+// It is only intended for instances where it is already known that the
+// input can only contain a single document.
+func FromJsonSingle(reader io.Reader, opts ...FromOption) (Map, error) {
+	mapCh, mapErr := FromJson(reader, append(opts, WithChannelSize(1))...)
+	return <-mapCh, <-mapErr
+}
+
+func fromJson(cfg *FromConfig) (chan Map, chan error) {
 	mapCh, errCh := cfg.channels()
 
 	decoder := json.NewDecoder(cfg.reader)
@@ -77,12 +102,29 @@ func fromNdjson(cfg *FromConfig) (chan Map, chan error) {
 				errCh <- err
 				return
 			}
-			mMap, err := NewMap(m)
-			if err != nil {
-				errCh <- err
+			val := reflect.ValueOf(m)
+			pp.Println("kind", val.Kind())
+			switch val.Kind() {
+			case reflect.Slice:
+				for i := 0; i < val.Len(); i++ {
+					elem, err := NewMap(val.Index(i).Interface())
+					if err != nil {
+						errCh <- fmt.Errorf("dataparse: error parsing element %d: %w", i, err)
+						return
+					}
+					mapCh <- elem
+				}
+			case reflect.Struct, reflect.Map:
+				mMap, err := NewMap(m)
+				if err != nil {
+					errCh <- err
+					return
+				}
+				mapCh <- mMap
+			default:
+				errCh <- fmt.Errorf("dataparse: unhandled type %q in file", val.Kind())
 				return
 			}
-			mapCh <- mMap
 		}
 	}()
 
@@ -95,7 +137,7 @@ func NewMap(in any) (Map, error) {
 	}
 
 	val := reflect.ValueOf(in)
-	if val.Kind() == reflect.Pointer {
+	for val.Kind() == reflect.Pointer {
 		val = val.Elem()
 	}
 
@@ -110,7 +152,10 @@ func NewMap(in any) (Map, error) {
 	case reflect.Struct:
 		m := Map{}
 		for i := 0; i < val.NumField(); i++ {
-			m[val.Type().Field(i).Name] = val.Field(i).Interface()
+			field := val.Field(i)
+			if field.CanInterface() {
+				m[val.Type().Field(i).Name] = field.Interface()
+			}
 		}
 		return m, nil
 	default:

@@ -9,7 +9,61 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFromNDJSONFile(t *testing.T) {
+func TestFrom_Json(t *testing.T) {
+	maps, errs, err := From("./testdata/data.json")
+	require.Nil(t, err)
+	for err := range errs {
+		require.Nil(t, err)
+	}
+
+	m := <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, "Garrott", m.MustGet("first_name").String())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, "Vasovic", m.MustGet("last_name").String())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, 3, m.MustGet("id").MustInt())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t,
+		time.Date(2023, time.June, 20, 23, 34, 57, 0, time.UTC),
+		m.MustGet("timestamp").MustTime(),
+	)
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t,
+		net.ParseIP("166.215.142.79"),
+		m.MustGet("ip_address").MustIP(),
+	)
+}
+
+func TestFromSingle_Json(t *testing.T) {
+	m, err := FromSingle("./testdata/single.json")
+	require.Nil(t, err)
+	require.NotNil(t, m)
+
+	assert.Equal(t, "Garrott", m.MustGet("first_name").String())
+	assert.Equal(t, "Felgate", m.MustGet("last_name").String())
+	assert.Equal(t, 1, m.MustGet("id").MustInt())
+
+	assert.Equal(t,
+		time.Date(2022, time.September, 28, 23, 9, 27, 0, time.UTC),
+		m.MustGet("timestamp").MustTime(),
+	)
+
+	assert.Equal(t,
+		net.ParseIP("77.111.249.225"),
+		m.MustGet("ip_address").MustIP(),
+	)
+}
+
+func TestFrom_Ndjson(t *testing.T) {
 	maps, errs, err := From("./testdata/data.ndjson")
 	require.Nil(t, err)
 	for err := range errs {
@@ -49,9 +103,9 @@ func TestNewMap(t *testing.T) {
 	require.Nil(t, err)
 	assert.Equal(t, 1, m.MustGet(1).MustInt())
 
-	m, err = NewMap(map[int]string{1: "test"})
+	m, err = NewMap(map[int]string{1: "lorem ipsum"})
 	require.Nil(t, err)
-	assert.Equal(t, "test", m.MustGet(1).String())
+	assert.Equal(t, "lorem ipsum", m.MustGet(1).String())
 
 	_, err = NewMap(nil)
 	require.NotNil(t, err)
@@ -60,10 +114,10 @@ func TestNewMap(t *testing.T) {
 	require.NotNil(t, err)
 
 	// handle pointers
-	ptrMap := map[string]int{"test": 1}
+	ptrMap := map[string]int{"dolor sit": 1}
 	m, err = NewMap(&ptrMap)
 	require.Nil(t, err)
-	assert.Equal(t, 1, m.MustGet("test").MustInt())
+	assert.Equal(t, 1, m.MustGet("dolor sit").MustInt())
 
 	// handle structs
 	type aStruct struct {
@@ -71,18 +125,18 @@ func TestNewMap(t *testing.T) {
 		B int
 	}
 	anInstance := aStruct{
-		A: "test",
+		A: "amet consectetur",
 		B: 5,
 	}
 	m, err = NewMap(anInstance)
 	require.Nil(t, err)
-	assert.Equal(t, "test", m.MustGet("A").String())
+	assert.Equal(t, "amet consectetur", m.MustGet("A").String())
 	assert.Equal(t, 5, m.MustGet("B").MustInt())
 
 	// handle pointer to struct
 	m, err = NewMap(&anInstance)
 	require.Nil(t, err)
-	assert.Equal(t, "test", m.MustGet("A").String())
+	assert.Equal(t, "amet consectetur", m.MustGet("A").String())
 	assert.Equal(t, 5, m.MustGet("B").MustInt())
 
 }
