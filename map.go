@@ -2,6 +2,7 @@ package dataparse
 
 import (
 	"compress/gzip"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -46,6 +47,13 @@ func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 	switch ext {
 	case ".json", ".ndjson":
 		fn = fromJson
+	case ".csv":
+		fn = fromCsv
+	case ".tsv":
+		// Default to tab as separator for .tsv
+		c2 := newFromConfig(append([]FromOption{WithSeparator("\t")}, opts...)...)
+		cfg.separator = c2.separator
+		fn = fromCsv
 	default:
 		return nil, nil, fmt.Errorf("dataparse: unhandled file extension: %q", ext)
 	}
@@ -72,6 +80,7 @@ func FromSingle(path string, opts ...FromOption) (Map, error) {
 // 3. An array of JSON documents
 func FromJson(reader io.Reader, opts ...FromOption) (chan Map, chan error) {
 	cfg := newFromConfig(opts...)
+	cfg.reader = reader
 	return fromJson(cfg)
 }
 
@@ -91,8 +100,6 @@ func fromJson(cfg *FromConfig) (chan Map, chan error) {
 
 	go func() {
 		defer cfg.Close()
-		defer close(mapCh)
-		defer close(errCh)
 
 		for decoder.More() {
 			// decoder refuses to decode into Map or map[any]any
@@ -123,6 +130,61 @@ func fromJson(cfg *FromConfig) (chan Map, chan error) {
 				errCh <- fmt.Errorf("dataparse: unhandled type %q in file", val.Kind())
 				return
 			}
+		}
+	}()
+
+	return mapCh, errCh
+}
+
+// FromCsv returns maps read from a CSV stream.
+func FromCsv(reader io.Reader, opts ...FromOption) (chan Map, chan error) {
+	cfg := newFromConfig(opts...)
+	cfg.reader = reader
+	return fromCsv(cfg)
+}
+
+func fromCsv(cfg *FromConfig) (chan Map, chan error) {
+	mapCh, errCh := cfg.channels()
+
+	if len(cfg.separator) != 1 {
+		defer cfg.Close()
+		errCh <- fmt.Errorf("dataparse: separator must be a string of length one for csv, got %q", cfg.separator)
+		return mapCh, errCh
+	}
+
+	reader := csv.NewReader(cfg.reader)
+	reader.Comma = rune(cfg.separator[0])
+	reader.FieldsPerRecord = len(cfg.headers)
+	reader.LazyQuotes = true
+	reader.TrimLeadingSpace = cfg.trimSpace
+
+	go func() {
+		defer cfg.Close()
+
+		if len(cfg.headers) == 0 {
+			h, err := reader.Read()
+			if err != nil {
+				errCh <- err
+				return
+			}
+			cfg.headers = h
+		}
+
+		for {
+			elems, err := reader.Read()
+			if err != nil {
+				if errors.Is(err, io.EOF) {
+					return
+				}
+				errCh <- err
+				return
+			}
+
+			m := Map{}
+			for i := range elems {
+				m[cfg.headers[i]] = elems[i]
+			}
+			mapCh <- m
 		}
 	}()
 

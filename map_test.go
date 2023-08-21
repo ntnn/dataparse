@@ -97,6 +97,40 @@ func TestFrom_Ndjson(t *testing.T) {
 	)
 }
 
+func TestFrom_Csv(t *testing.T) {
+	maps, errs, err := From("./testdata/data.csv")
+	require.Nil(t, err)
+	for err := range errs {
+		require.Nil(t, err)
+	}
+
+	m := <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, "Robbie", m.MustGet("first_name").String())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, "Salvin", m.MustGet("last_name").String())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, 3, m.MustGet("id").MustInt())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t,
+		time.Date(2023, time.June, 26, 7, 22, 35, 0, time.UTC),
+		m.MustGet("timestamp").MustTime(),
+	)
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t,
+		net.ParseIP("56.85.108.10"),
+		m.MustGet("ip_address").MustIP(),
+	)
+}
+
 func TestFromKVString(t *testing.T) {
 	m, err := FromKVString("a=1,b=test,c,d=0x05")
 	require.Nil(t, err)

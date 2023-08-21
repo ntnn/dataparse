@@ -12,9 +12,15 @@ type FromConfig struct {
 
 	separator string
 	trimSpace bool
+	headers   []string
 
 	reader  io.Reader
 	closers []func() error
+
+	// Not something that necessarily needs to be done but allows for
+	// an easy cleanup with one call to .Close.
+	mapCh chan Map
+	errCh chan error
 }
 
 func newFromConfig(opts ...FromOption) *FromConfig {
@@ -23,6 +29,7 @@ func newFromConfig(opts ...FromOption) *FromConfig {
 		errChannelSize: 1,
 		separator:      ",",
 		trimSpace:      true,
+		headers:        []string{},
 		closers:        []func() error{},
 	}
 
@@ -33,11 +40,20 @@ func newFromConfig(opts ...FromOption) *FromConfig {
 	return cfg
 }
 
-func (cfg FromConfig) channels() (chan Map, chan error) {
-	return make(chan Map, cfg.channelSize), make(chan error, 1)
+func (cfg *FromConfig) channels() (chan Map, chan error) {
+	cfg.mapCh = make(chan Map, cfg.channelSize)
+	cfg.errCh = make(chan error, cfg.errChannelSize)
+	return cfg.mapCh, cfg.errCh
 }
 
 func (cfg FromConfig) Close() error {
+	if cfg.mapCh != nil {
+		close(cfg.mapCh)
+	}
+	if cfg.errCh != nil {
+		close(cfg.errCh)
+	}
+
 	var retErr error
 	slices.Reverse(cfg.closers)
 	for _, closer := range cfg.closers {
@@ -68,8 +84,8 @@ func WithErrChannelSize(i int) FromOption {
 	}
 }
 
-// WithSeparator defines the separator to split strings on when parsing
-// input.
+// WithSeparator defines the separator to use when splitting strings or
+// when reading formats with delimiters.
 // Defaults to ",".
 // This does not apply to unmarshalled values like JSON.
 func WithSeparator(sep string) FromOption {
@@ -84,5 +100,15 @@ func WithSeparator(sep string) FromOption {
 func WithTrimSpace(trim bool) FromOption {
 	return func(opt *FromConfig) {
 		opt.trimSpace = trim
+	}
+}
+
+// WithHeaders defines which headers are expected when reading delimited
+// formats like csv. If no headers are set the input is expected to have
+// headers.
+// Defaults to []string.
+func WithHeaders(headers []string) FromOption {
+	return func(opt *FromConfig) {
+		opt.headers = headers
 	}
 }
