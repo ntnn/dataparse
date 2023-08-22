@@ -17,6 +17,10 @@ func (v Value) IsNil() bool {
 }
 
 func (v Value) List() ([]Value, error) {
+	if v.Data == nil {
+		return []Value{}, ErrValueIsNil
+	}
+
 	switch reflect.TypeOf(v.Data).Kind() {
 	case reflect.Slice:
 		l := reflect.ValueOf(v.Data)
