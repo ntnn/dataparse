@@ -7,6 +7,10 @@ import (
 )
 
 func (v Value) String() string {
+	if v.Data == nil {
+		return ""
+	}
+
 	switch typed := v.Data.(type) {
 	case rune:
 		return string(typed)
