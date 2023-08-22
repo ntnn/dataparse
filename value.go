@@ -35,8 +35,15 @@ func (v Value) List() ([]Value, error) {
 }
 
 func (v Value) MustList() []Value {
-	if l, err := v.List(); err != nil {
-		return l
-	}
-	return []Value{v}
+	l, _ := v.List()
+	return l
+}
+
+func (v Value) Map() (Map, error) {
+	return NewMap(v.Data)
+}
+
+func (v Value) MustMap() Map {
+	m, _ := v.Map()
+	return m
 }
