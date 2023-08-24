@@ -19,6 +19,10 @@ func (v Value) String() string {
 	}
 }
 
+func (v Value) TrimString() string {
+	return strings.TrimSpace(v.String())
+}
+
 func (v Value) ListString(sep string) ([]string, error) {
 	val := reflect.ValueOf(v.Data)
 	switch val.Kind() {
