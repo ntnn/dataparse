@@ -8,6 +8,7 @@ import (
 
 	fuzz "github.com/google/gofuzz"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Fuzz implements the interface exepcted by gofuzz to fuzz itself.
@@ -66,6 +67,13 @@ func (v *Value) Fuzz(c fuzz.Continue) {
 	case 18:
 		v.Data = c.Float64()
 	}
+}
+
+func TestValue_To(t *testing.T) {
+	v := NewValue("test")
+	var s string
+	require.Nil(t, v.To(&s))
+	assert.Equal(t, "test", s)
 }
 
 func TestValue_List(t *testing.T) {
