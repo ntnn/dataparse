@@ -1,17 +1,20 @@
-//go:build gen
-
 package main
 
 import (
+	_ "embed"
+	"flag"
 	"log"
 	"os"
 	"strings"
 	"text/template"
+)
 
-	"github.com/ntnn/dataparse"
+var (
+	fOutput = flag.String("output", "value_numbers_gen.go", "File to write to")
 )
 
 func main() {
+	flag.Parse()
 	if err := doMain(); err != nil {
 		log.Fatal(err)
 	}
@@ -25,13 +28,13 @@ func doMain() error {
 	return nil
 }
 
-func makeTemplate(path string) (*template.Template, error) {
-	tmpl := template.New(path)
+func makeTemplate(text string) (*template.Template, error) {
+	tmpl := template.New("")
 	tmpl.Funcs(template.FuncMap{
 		"hasPrefix": strings.HasPrefix,
 	})
 
-	tmpl, err := tmpl.ParseFiles(path)
+	tmpl, err := tmpl.Parse(text)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +65,13 @@ type numberData struct {
 }
 
 func (nd numberData) NativeConverts() []string {
-	return dataparse.FilterSlice(numberTypes, nd.Datatype())
+	ret := []string{}
+	for _, member := range numberTypes {
+		if member != nd.Datatype() {
+			ret = append(ret, member)
+		}
+	}
+	return ret
 }
 
 func (nd numberData) Datatype() string {
@@ -79,26 +88,34 @@ func (nd numberData) Default() string {
 	return "0"
 }
 
+//go:embed value_numbers.gotmpl
+var numbersTmpl string
+
 func numbers() error {
-	tmpl, err := makeTemplate("value_numbers.gotmpl")
+	tmpl, err := makeTemplate(numbersTmpl)
 	if err != nil {
 		return err
 	}
 
-	gen, err := os.Create("value_numbers_gen.go")
+	gen, err := os.Create(*fOutput)
 	if err != nil {
 		return err
 	}
 	defer gen.Close()
 
-	gen.WriteString("package dataparse\n\n")
-	gen.WriteString("import (\n")
-	gen.WriteString("	\"encoding/binary\"\n")
-	gen.WriteString("	\"fmt\"\n")
-	gen.WriteString("	\"math\"\n")
-	gen.WriteString("	\"strconv\"\n")
-	gen.WriteString("	\"strings\"\n")
-	gen.WriteString(")\n\n")
+	if _, err := gen.WriteString(`package dataparse
+
+import (
+	"encoding/binary"
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
+)
+
+`); err != nil {
+		return err
+	}
 
 	for _, data := range []numberData{
 		{
@@ -153,7 +170,9 @@ func numbers() error {
 		if err := tmpl.Execute(gen, data); err != nil {
 			return err
 		}
-		gen.WriteString("\n")
+		if _, err := gen.WriteString("\n"); err != nil {
+			return err
+		}
 	}
 
 	return nil

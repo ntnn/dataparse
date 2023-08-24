@@ -10,7 +10,7 @@ func NewValue(data any) Value {
 	return Value{Data: data}
 }
 
-//go:generate go run ./value_numbers.go
+//go:generate go run ./cmd/gen-value-numbers
 
 func (v Value) IsNil() bool {
 	return v.Data == nil
