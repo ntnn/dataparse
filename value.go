@@ -20,35 +20,36 @@ func (v Value) IsNil() bool {
 }
 
 func (v Value) To(other any) error {
+	var err error
 	switch typed := other.(type) {
 	case *string:
-		*typed = v.String()
+		*typed, err = v.String()
 	case *int:
-		*typed = v.MustInt()
+		*typed, err = v.Int()
 	case *int8:
-		*typed = v.MustInt8()
+		*typed, err = v.Int8()
 	case *int16:
-		*typed = v.MustInt16()
+		*typed, err = v.Int16()
 	case *int32:
-		*typed = v.MustInt32()
+		*typed, err = v.Int32()
 	case *int64:
-		*typed = v.MustInt64()
+		*typed, err = v.Int64()
 	case *uint:
-		*typed = v.MustUint()
+		*typed, err = v.Uint()
 	case *uint8:
-		*typed = v.MustUint8()
+		*typed, err = v.Uint8()
 	case *uint16:
-		*typed = v.MustUint16()
+		*typed, err = v.Uint16()
 	case *uint32:
-		*typed = v.MustUint32()
+		*typed, err = v.Uint32()
 	case *uint64:
-		*typed = v.MustUint64()
+		*typed, err = v.Uint64()
 	case *float32:
-		*typed = v.MustFloat32()
+		*typed, err = v.Float32()
 	case *float64:
-		*typed = v.MustFloat64()
+		*typed, err = v.Float64()
 	case *bool:
-		*typed = v.MustBool()
+		*typed, err = v.Bool()
 	// case *byte:
 	// 	*typed = v.MustByte()
 	// case *[]byte:
@@ -56,7 +57,7 @@ func (v Value) To(other any) error {
 	default:
 		return fmt.Errorf("dataparse: unhandled type: %T", other)
 	}
-	return nil
+	return err
 }
 
 func (v Value) List() ([]Value, error) {
