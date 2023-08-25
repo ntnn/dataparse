@@ -71,9 +71,24 @@ func (v *Value) Fuzz(c fuzz.Continue) {
 
 func TestValue_To(t *testing.T) {
 	v := NewValue("test")
-	var s string
+	s := ""
 	require.Nil(t, v.To(&s))
 	assert.Equal(t, "test", s)
+
+	v = NewValue(5)
+	var i int = 0
+	require.Nil(t, v.To(&i))
+	assert.Equal(t, 5, i)
+
+	v = NewValue("5")
+	i = 0
+	require.Nil(t, v.To(&i))
+	assert.Equal(t, 5, i)
+
+	v = NewValue(uint(math.MaxInt64) + 5)
+	var u uint = 0
+	require.Nil(t, v.To(&u))
+	assert.Equal(t, uint(math.MaxInt64)+5, u)
 }
 
 func TestValue_List(t *testing.T) {
