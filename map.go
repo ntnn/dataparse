@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+//go:generate go run ./cmd/gen-map-shortcuts
+
 type Map map[any]any
 
 // From returns maps parsed from a file.
