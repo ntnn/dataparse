@@ -6,21 +6,27 @@ import (
 	"strings"
 )
 
-func (v Value) String() string {
+// String returns the underlying value as a string.
+func (v Value) String() (string, error) {
 	if v.Data == nil {
-		return ""
+		return "", nil
 	}
 
 	switch typed := v.Data.(type) {
 	case rune:
-		return string(typed)
+		return string(typed), nil
 	default:
-		return fmt.Sprintf("%v", v.Data)
+		return fmt.Sprintf("%v", v.Data), nil
 	}
 }
 
+func (v Value) MustString() string {
+	s, _ := v.String()
+	return s
+}
+
 func (v Value) TrimString() string {
-	return strings.TrimSpace(v.String())
+	return strings.TrimSpace(v.MustString())
 }
 
 func (v Value) ListString(sep string) ([]string, error) {
@@ -37,7 +43,11 @@ func (v Value) ListString(sep string) ([]string, error) {
 		}
 		return ret, nil
 	default:
-		return strings.Split(v.String(), sep), nil
+		s, err := v.String()
+		if err != nil {
+			return nil, fmt.Errorf("dataparse: error turning %q into string to split: %w", v.Data, err)
+		}
+		return strings.Split(s, sep), nil
 	}
 }
 

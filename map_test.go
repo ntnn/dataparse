@@ -18,11 +18,11 @@ func TestFrom_Json(t *testing.T) {
 
 	m := <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Garrott", m.MustGet("first_name").String())
+	assert.Equal(t, "Garrott", m.MustGet("first_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Vasovic", m.MustGet("last_name").String())
+	assert.Equal(t, "Vasovic", m.MustGet("last_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
@@ -48,8 +48,8 @@ func TestFromSingle_Json(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, m)
 
-	assert.Equal(t, "Garrott", m.MustGet("first_name").String())
-	assert.Equal(t, "Felgate", m.MustGet("last_name").String())
+	assert.Equal(t, "Garrott", m.MustGet("first_name").MustString())
+	assert.Equal(t, "Felgate", m.MustGet("last_name").MustString())
 	assert.Equal(t, 1, m.MustGet("id").MustInt())
 
 	assert.Equal(t,
@@ -72,11 +72,11 @@ func TestFrom_Ndjson(t *testing.T) {
 
 	m := <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Garrott", m.MustGet("first_name").String())
+	assert.Equal(t, "Garrott", m.MustGet("first_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Vasovic", m.MustGet("last_name").String())
+	assert.Equal(t, "Vasovic", m.MustGet("last_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
@@ -106,11 +106,11 @@ func TestFrom_Csv(t *testing.T) {
 
 	m := <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Robbie", m.MustGet("first_name").String())
+	assert.Equal(t, "Robbie", m.MustGet("first_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Salvin", m.MustGet("last_name").String())
+	assert.Equal(t, "Salvin", m.MustGet("last_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
@@ -136,13 +136,13 @@ func TestFromKVString(t *testing.T) {
 	require.Nil(t, err)
 
 	assert.Equal(t, 1, m.MustGet("a").MustInt())
-	assert.Equal(t, "test", m.MustGet("b").String())
+	assert.Equal(t, "test", m.MustGet("b").MustString())
 	assert.True(t, m.MustGet("c").IsNil())
 
 	m, err = FromKVString("key1=value1|key2=value2", WithSeparator("|"))
 	require.Nil(t, err)
-	assert.Equal(t, "value1", m.MustGet("key1").String())
-	assert.Equal(t, "value2", m.MustGet("key2").String())
+	assert.Equal(t, "value1", m.MustGet("key1").MustString())
+	assert.Equal(t, "value2", m.MustGet("key2").MustString())
 }
 
 func TestNewMap(t *testing.T) {
@@ -153,7 +153,7 @@ func TestNewMap(t *testing.T) {
 
 	m, err = NewMap(map[int]string{1: "lorem ipsum"})
 	require.Nil(t, err)
-	assert.Equal(t, "lorem ipsum", m.MustGet(1).String())
+	assert.Equal(t, "lorem ipsum", m.MustGet(1).MustString())
 
 	_, err = NewMap(nil)
 	require.NotNil(t, err)
@@ -178,13 +178,13 @@ func TestNewMap(t *testing.T) {
 	}
 	m, err = NewMap(anInstance)
 	require.Nil(t, err)
-	assert.Equal(t, "amet consectetur", m.MustGet("A").String())
+	assert.Equal(t, "amet consectetur", m.MustGet("A").MustString())
 	assert.Equal(t, 5, m.MustGet("B").MustInt())
 
 	// handle pointer to struct
 	m, err = NewMap(&anInstance)
 	require.Nil(t, err)
-	assert.Equal(t, "amet consectetur", m.MustGet("A").String())
+	assert.Equal(t, "amet consectetur", m.MustGet("A").MustString())
 	assert.Equal(t, 5, m.MustGet("B").MustInt())
 
 }

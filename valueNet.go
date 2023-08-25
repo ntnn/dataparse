@@ -12,7 +12,11 @@ func (v Value) IP() (net.IP, error) {
 			return net.IPv4(typed[0], typed[1], typed[2], typed[3]), nil
 		}
 	default:
-		if ip := net.ParseIP(v.String()); ip != nil {
+		s, err := v.String()
+		if err != nil {
+			return nil, fmt.Errorf("dataparse: error turning %q into string to parse: %w", v.Data, err)
+		}
+		if ip := net.ParseIP(s); ip != nil {
 			return ip, nil
 		}
 	}
@@ -25,7 +29,11 @@ func (v Value) MustIP() net.IP {
 }
 
 func (v Value) MAC() (net.HardwareAddr, error) {
-	return net.ParseMAC(v.String())
+	s, err := v.String()
+	if err != nil {
+		return nil, fmt.Errorf("dataparse: error turning %q into string to parse: %w", v.Data, err)
+	}
+	return net.ParseMAC(s)
 }
 
 func (v Value) MustMAC() net.HardwareAddr {

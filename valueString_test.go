@@ -8,34 +8,34 @@ import (
 
 func TestValue_String(t *testing.T) {
 	// string to string
-	assert.Equal(t, "test", NewValue("test").String())
+	assert.Equal(t, "test", NewValue("test").MustString())
 
 	// integer to string
-	assert.Equal(t, "1", NewValue(1).String())
+	assert.Equal(t, "1", NewValue(1).MustString())
 
 	// negative integer to string
-	assert.Equal(t, "-1", NewValue(-1).String())
+	assert.Equal(t, "-1", NewValue(-1).MustString())
 
 	// int8 to string
-	assert.Equal(t, "1", NewValue(int8(1)).String())
+	assert.Equal(t, "1", NewValue(int8(1)).MustString())
 
 	// unsigned integer to string
-	assert.Equal(t, "1", NewValue(uint(1)).String())
+	assert.Equal(t, "1", NewValue(uint(1)).MustString())
 
 	// uint8 to string
-	assert.Equal(t, "1", NewValue(uint8(1)).String())
+	assert.Equal(t, "1", NewValue(uint8(1)).MustString())
 
 	// float to string
-	assert.Equal(t, "1", NewValue(1.0).String())
+	assert.Equal(t, "1", NewValue(1.0).MustString())
 
-	assert.Equal(t, "1.4", NewValue(1.4).String())
+	assert.Equal(t, "1.4", NewValue(1.4).MustString())
 
 	// rune to string
-	assert.Equal(t, "c", NewValue('c').String())
+	assert.Equal(t, "c", NewValue('c').MustString())
 
 	assert.Equal(t,
 		"test string",
-		NewValue(any("test string")).String(),
+		NewValue(any("test string")).MustString(),
 	)
 }
 
