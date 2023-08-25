@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	fOutput = flag.String("output", "value_numbers_gen.go", "File to write to")
+	fOutput = flag.String("output", "valueNumbers.gen.go", "File to write to")
 )
 
 func main() {
