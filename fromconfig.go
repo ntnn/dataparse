@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-type FromConfig struct {
+type fromConfig struct {
 	channelSize    int
 	errChannelSize int
 
@@ -23,8 +23,8 @@ type FromConfig struct {
 	errCh chan error
 }
 
-func newFromConfig(opts ...FromOption) *FromConfig {
-	cfg := &FromConfig{
+func newFromConfig(opts ...FromOption) *fromConfig {
+	cfg := &fromConfig{
 		channelSize:    100,
 		errChannelSize: 1,
 		separator:      ",",
@@ -40,13 +40,13 @@ func newFromConfig(opts ...FromOption) *FromConfig {
 	return cfg
 }
 
-func (cfg *FromConfig) channels() (chan Map, chan error) {
+func (cfg *fromConfig) channels() (chan Map, chan error) {
 	cfg.mapCh = make(chan Map, cfg.channelSize)
 	cfg.errCh = make(chan error, cfg.errChannelSize)
 	return cfg.mapCh, cfg.errCh
 }
 
-func (cfg FromConfig) Close() error {
+func (cfg fromConfig) Close() error {
 	if cfg.mapCh != nil {
 		close(cfg.mapCh)
 	}
@@ -64,13 +64,13 @@ func (cfg FromConfig) Close() error {
 	return retErr
 }
 
-type FromOption func(*FromConfig)
+type FromOption func(*fromConfig)
 
 // WithChannelSize defines the buffer size of channels for functions
 // returning channels.
 // Defaults to 100.
 func WithChannelSize(i int) FromOption {
-	return func(opt *FromConfig) {
+	return func(opt *fromConfig) {
 		opt.channelSize = i
 	}
 }
@@ -79,7 +79,7 @@ func WithChannelSize(i int) FromOption {
 // functions returning error channels.
 // Defaults to 1.
 func WithErrChannelSize(i int) FromOption {
-	return func(opt *FromConfig) {
+	return func(opt *fromConfig) {
 		opt.errChannelSize = i
 	}
 }
@@ -89,7 +89,7 @@ func WithErrChannelSize(i int) FromOption {
 // Defaults to ",".
 // This does not apply to unmarshalled values like JSON.
 func WithSeparator(sep string) FromOption {
-	return func(opt *FromConfig) {
+	return func(opt *fromConfig) {
 		opt.separator = sep
 	}
 }
@@ -98,7 +98,7 @@ func WithSeparator(sep string) FromOption {
 // Defaults to true.
 // This does not apply to unmarshalled values like JSON.
 func WithTrimSpace(trim bool) FromOption {
-	return func(opt *FromConfig) {
+	return func(opt *fromConfig) {
 		opt.trimSpace = trim
 	}
 }
@@ -108,7 +108,7 @@ func WithTrimSpace(trim bool) FromOption {
 // headers.
 // Defaults to []string.
 func WithHeaders(headers ...string) FromOption {
-	return func(opt *FromConfig) {
+	return func(opt *fromConfig) {
 		opt.headers = headers
 	}
 }

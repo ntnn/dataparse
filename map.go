@@ -45,7 +45,7 @@ func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 		ext = filepath.Ext(filepath.Ext(path))
 	}
 
-	var fn func(cfg *FromConfig) (chan Map, chan error)
+	var fn func(cfg *fromConfig) (chan Map, chan error)
 	switch ext {
 	case ".json", ".ndjson":
 		fn = fromJson
@@ -95,7 +95,7 @@ func FromJsonSingle(reader io.Reader, opts ...FromOption) (Map, error) {
 	return <-mapCh, <-mapErr
 }
 
-func fromJson(cfg *FromConfig) (chan Map, chan error) {
+func fromJson(cfg *fromConfig) (chan Map, chan error) {
 	mapCh, errCh := cfg.channels()
 
 	decoder := json.NewDecoder(cfg.reader)
@@ -145,7 +145,7 @@ func FromCsv(reader io.Reader, opts ...FromOption) (chan Map, chan error) {
 	return fromCsv(cfg)
 }
 
-func fromCsv(cfg *FromConfig) (chan Map, chan error) {
+func fromCsv(cfg *fromConfig) (chan Map, chan error) {
 	mapCh, errCh := cfg.channels()
 
 	if len(cfg.separator) != 1 {
