@@ -2,6 +2,7 @@ package dataparse
 
 import (
 	"fmt"
+	"net"
 	"reflect"
 )
 
@@ -50,6 +51,8 @@ func (v Value) To(other any) error {
 		*typed, err = v.Float64()
 	case *bool:
 		*typed, err = v.Bool()
+	case *net.IP:
+		*typed, err = v.IP()
 	// case *byte:
 	// 	*typed = v.MustByte()
 	// case *[]byte:

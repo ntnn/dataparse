@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"net"
 	"testing"
 
 	fuzz "github.com/google/gofuzz"
@@ -89,6 +90,11 @@ func TestValue_To(t *testing.T) {
 	var u uint = 0
 	require.Nil(t, v.To(&u))
 	assert.Equal(t, uint(math.MaxInt64)+5, u)
+
+	v = NewValue("192.168.1.1")
+	var ip net.IP
+	require.Nil(t, v.To(&ip))
+	assert.Equal(t, net.ParseIP("192.168.1.1"), ip)
 }
 
 func TestValue_List(t *testing.T) {
