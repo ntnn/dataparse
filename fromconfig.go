@@ -107,7 +107,7 @@ func WithTrimSpace(trim bool) FromOption {
 // formats like csv. If no headers are set the input is expected to have
 // headers.
 // Defaults to []string.
-func WithHeaders(headers []string) FromOption {
+func WithHeaders(headers ...string) FromOption {
 	return func(opt *FromConfig) {
 		opt.headers = headers
 	}
