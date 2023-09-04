@@ -7,6 +7,10 @@ import (
 )
 
 // String returns the underlying value as a string.
+//
+// Note that String never returns an error and is identical to
+// MustString. String and MustString are only kept to follow the same
+// conventions as all other transformation methods follow.
 func (v Value) String() (string, error) {
 	if v.Data == nil {
 		return "", nil
@@ -20,15 +24,24 @@ func (v Value) String() (string, error) {
 	}
 }
 
+// MustString is the error-ignoring version of String.
 func (v Value) MustString() string {
 	s, _ := v.String()
 	return s
 }
 
+// TrimString returns the result of String with spaces trimmed.
 func (v Value) TrimString() string {
 	return strings.TrimSpace(v.MustString())
 }
 
+// ListString returns the underlying data as a slice of strings.
+//
+// If the underlying data is a slice each member is transformed into
+// a string using the Value.String method.
+//
+// If the underlying data is a string the string is split using the
+// passed separator.
 func (v Value) ListString(sep string) ([]string, error) {
 	val := reflect.ValueOf(v.Data)
 	switch val.Kind() {
@@ -39,7 +52,7 @@ func (v Value) ListString(sep string) ([]string, error) {
 			if elem.Kind() == reflect.Interface {
 				elem = elem.Elem()
 			}
-			ret[i] = elem.String()
+			ret[i] = NewValue(elem.Interface()).MustString()
 		}
 		return ret, nil
 	default:
@@ -51,6 +64,7 @@ func (v Value) ListString(sep string) ([]string, error) {
 	}
 }
 
+// MustListString is the error-ignoring version of ListString.
 func (v Value) MustListString(sep string) []string {
 	val, _ := v.ListString(sep)
 	return val

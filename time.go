@@ -5,26 +5,28 @@ import (
 	"time"
 )
 
+// ParseTimeFormats are the various formats ParseTime and its consumers
+// utilize to attempt to parse timestamps.
 var ParseTimeFormats = []string{
-	// most common formats
+	// Most common formats
 	time.RFC3339,
 	time.RFC3339Nano,
 	time.DateTime,
 	time.DateOnly,
 	time.TimeOnly,
 
-	// likely more common than the remaining rfc formats
+	// Likely more common than the remaining rfc formats
 	time.ANSIC,
 	time.UnixDate,
 
-	// remaining rfc formats
+	// Remaining rfc formats
 	time.RFC822,
 	time.RFC822Z,
 	time.RFC850,
 	time.RFC1123,
 	time.RFC1123Z,
 
-	// everything else
+	// Everything else from stdlib
 	time.Layout,
 	time.RubyDate,
 	time.Kitchen,

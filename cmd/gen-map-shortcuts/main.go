@@ -28,15 +28,15 @@ var helperTemplate = `
 // the resulting Value.
 //
 // Calling this method is equivalent to:
-// val, err := m.Get("a")
-// if err != nil {
-//	// error handling
-// }
-// parsed, err := val.{{.Name}}()
-// if err != nil {
-//	// error handling
-// }
-// // use parsed
+//
+//	val, err := m.Get("a")
+//	if err != nil {
+//		// error handling
+//	}
+//	parsed, err := val.{{.Name}}()
+//	if err != nil {
+//		// error handling
+//	}
 func (m Map) {{.Name}}(keys ...any) ({{.Datatype}}, error) {
 	v, err := m.Get(keys...)
 	if err != nil {

@@ -10,10 +10,13 @@ var (
 	ErrValueIsNotPointer = errors.New("dataparse: value is not pointer")
 )
 
+// ErrUnhandled is returned as an error if the underlying type is not
+// handled by dataparse.
 type ErrUnhandled struct {
 	Value any
 }
 
+// NewErrUnhandled returns an ErrUnhandled with the given value.
 func NewErrUnhandled(value any) ErrUnhandled {
 	return ErrUnhandled{Value: value}
 }

@@ -6,20 +6,31 @@ import (
 	"reflect"
 )
 
+// Value is one of the two central types in dataparse.
+// It is used to transform data between various representations.
 type Value struct {
 	Data any
 }
 
+// NewValue returns the passed data as a Value.
 func NewValue(data any) Value {
 	return Value{Data: data}
 }
 
 //go:generate go run ./cmd/gen-value-numbers
 
+// IsNil returns true if the data Value stores is nil.
 func (v Value) IsNil() bool {
 	return v.Data == nil
 }
 
+// To transforms the stored data into the target type and returns any
+// occurring errors.
+//
+// The passed value must be a pointer.
+//
+// To utilizes the various transformation methods and returns their
+// errors.
 func (v Value) To(other any) error {
 	var err error
 	switch typed := other.(type) {
@@ -63,6 +74,10 @@ func (v Value) To(other any) error {
 	return err
 }
 
+// List returns the underlying data as a slice of Values.
+//
+// Warning: This method is very simplistic and at the moment only
+// returns a proper slice of values if the underlying data is a slice.
 func (v Value) List() ([]Value, error) {
 	if v.Data == nil {
 		return []Value{}, ErrValueIsNil
@@ -81,15 +96,18 @@ func (v Value) List() ([]Value, error) {
 	}
 }
 
+// MustList is the error-ignoring version of List.
 func (v Value) MustList() []Value {
 	l, _ := v.List()
 	return l
 }
 
+// Map returns the underlying data as a Map.
 func (v Value) Map() (Map, error) {
 	return NewMap(v.Data)
 }
 
+// MustMap is the error-ignoring version of Map.
 func (v Value) MustMap() Map {
 	m, _ := v.Map()
 	return m

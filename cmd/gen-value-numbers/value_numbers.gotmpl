@@ -1,3 +1,4 @@
+// {{.Name}} returns the underlying data as a {{.Datatype}}.
 func (v Value) {{.Name}}() ({{.Datatype}}, error) {
 	if v.Data == nil {
 		return {{.Default}}, ErrValueIsNil
@@ -57,11 +58,14 @@ func (v Value) {{.Name}}() ({{.Datatype}}, error) {
 	}
 }
 
+{{/*
 func (v Value) List{{.Name}}() ([]{{.Datatype}}, error) {
 	// TODO
 	return []{{.Datatype}}{ {{.Default}} }, nil
 }
+*/}}
 
+// Must{{.Name}} is the error-ignoring version of {{.Name}}.
 func (v Value) Must{{.Name}}() {{.Datatype}} {
 	if val, err := v.{{.Name}}(); err == nil {
 		return val
@@ -69,9 +73,11 @@ func (v Value) Must{{.Name}}() {{.Datatype}} {
 	return {{.Default}}
 }
 
+{{/*
 func (v Value) MustList{{.Name}}() []{{.Datatype}} {
 	if val, err := v.List{{.Name}}(); err == nil {
 		return val
 	}
 	return []{{.Datatype}}{ {{.Default}} }
 }
+*/}}

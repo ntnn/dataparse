@@ -15,9 +15,18 @@ import (
 
 //go:generate go run ./cmd/gen-map-shortcuts
 
+// Map is one of the two central types in dataparse.
+// It is used to store and retrieve data taken from various sources.
 type Map map[any]any
 
 // From returns maps parsed from a file.
+//
+// From utilizes other functions for various data types like JSON and
+// CSV.
+//
+// From automatically unpacks the following archives based on their file
+// extension:
+//   - gzip: .gz
 func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 	cfg := newFromConfig(opts...)
 	defer cfg.Close()
@@ -226,6 +235,8 @@ func FromKVString(kv string, opts ...FromOption) (Map, error) {
 	return m, nil
 }
 
+// NewMap creates a map from the passed value.
+// Valid values are maps and structs.
 func NewMap(in any) (Map, error) {
 	if in == nil {
 		return Map{}, ErrValueIsNil
@@ -258,10 +269,16 @@ func NewMap(in any) (Map, error) {
 	}
 }
 
+// Has returns true if the map has an entry for any of the passed keys.
+// The keys are checked in order.
 func (m Map) Has(keys ...any) bool {
 	return !m.MustGet(keys...).IsNil()
 }
 
+// Get checks for Value entries for each of the given keys in order and
+// returns the first.
+// If no Value is found a dataparse.Value `nil` and an error is
+// returned.
 func (m Map) Get(keys ...any) (Value, error) {
 	for _, key := range keys {
 		if v, ok := m[key]; ok {
@@ -271,11 +288,13 @@ func (m Map) Get(keys ...any) (Value, error) {
 	return NewValue(nil), fmt.Errorf("dataparse: no valid key: %v", keys)
 }
 
+// MustGet is the error-ignoring version of Get.
 func (m Map) MustGet(keys ...any) Value {
 	v, _ := m.Get(keys...)
 	return v
 }
 
+// Map works like Get but returns a Map.
 func (m Map) Map(keys ...any) (Map, error) {
 	for _, key := range keys {
 		if v, ok := m[key]; ok {
@@ -285,6 +304,7 @@ func (m Map) Map(keys ...any) (Map, error) {
 	return Map{}, fmt.Errorf("dataparse: no valid keys: %v", keys)
 }
 
+// MustMap is the error-ignoring version of Map.
 func (m Map) MustMap(keys ...any) Map {
 	v, _ := m.Map(keys...)
 	return v

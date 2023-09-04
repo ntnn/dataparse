@@ -8,15 +8,15 @@ import (
 // the resulting Value.
 //
 // Calling this method is equivalent to:
-// val, err := m.Get("a")
-// if err != nil {
-//	// error handling
-// }
-// parsed, err := val.Int()
-// if err != nil {
-//	// error handling
-// }
-// // use parsed
+//
+//	val, err := m.Get("a")
+//	if err != nil {
+//		// error handling
+//	}
+//	parsed, err := val.Int()
+//	if err != nil {
+//		// error handling
+//	}
 func (m Map) Int(keys ...any) (int, error) {
 	v, err := m.Get(keys...)
 	if err != nil {
@@ -35,15 +35,15 @@ func (m Map) MustInt(keys ...any) int {
 // the resulting Value.
 //
 // Calling this method is equivalent to:
-// val, err := m.Get("a")
-// if err != nil {
-//	// error handling
-// }
-// parsed, err := val.Int64()
-// if err != nil {
-//	// error handling
-// }
-// // use parsed
+//
+//	val, err := m.Get("a")
+//	if err != nil {
+//		// error handling
+//	}
+//	parsed, err := val.Int64()
+//	if err != nil {
+//		// error handling
+//	}
 func (m Map) Int64(keys ...any) (int64, error) {
 	v, err := m.Get(keys...)
 	if err != nil {
@@ -62,15 +62,15 @@ func (m Map) MustInt64(keys ...any) int64 {
 // the resulting Value.
 //
 // Calling this method is equivalent to:
-// val, err := m.Get("a")
-// if err != nil {
-//	// error handling
-// }
-// parsed, err := val.Uint()
-// if err != nil {
-//	// error handling
-// }
-// // use parsed
+//
+//	val, err := m.Get("a")
+//	if err != nil {
+//		// error handling
+//	}
+//	parsed, err := val.Uint()
+//	if err != nil {
+//		// error handling
+//	}
 func (m Map) Uint(keys ...any) (uint, error) {
 	v, err := m.Get(keys...)
 	if err != nil {
@@ -89,15 +89,15 @@ func (m Map) MustUint(keys ...any) uint {
 // the resulting Value.
 //
 // Calling this method is equivalent to:
-// val, err := m.Get("a")
-// if err != nil {
-//	// error handling
-// }
-// parsed, err := val.Uint64()
-// if err != nil {
-//	// error handling
-// }
-// // use parsed
+//
+//	val, err := m.Get("a")
+//	if err != nil {
+//		// error handling
+//	}
+//	parsed, err := val.Uint64()
+//	if err != nil {
+//		// error handling
+//	}
 func (m Map) Uint64(keys ...any) (uint64, error) {
 	v, err := m.Get(keys...)
 	if err != nil {
@@ -116,15 +116,15 @@ func (m Map) MustUint64(keys ...any) uint64 {
 // the resulting Value.
 //
 // Calling this method is equivalent to:
-// val, err := m.Get("a")
-// if err != nil {
-//	// error handling
-// }
-// parsed, err := val.String()
-// if err != nil {
-//	// error handling
-// }
-// // use parsed
+//
+//	val, err := m.Get("a")
+//	if err != nil {
+//		// error handling
+//	}
+//	parsed, err := val.String()
+//	if err != nil {
+//		// error handling
+//	}
 func (m Map) String(keys ...any) (string, error) {
 	v, err := m.Get(keys...)
 	if err != nil {
@@ -143,15 +143,15 @@ func (m Map) MustString(keys ...any) string {
 // the resulting Value.
 //
 // Calling this method is equivalent to:
-// val, err := m.Get("a")
-// if err != nil {
-//	// error handling
-// }
-// parsed, err := val.Time()
-// if err != nil {
-//	// error handling
-// }
-// // use parsed
+//
+//	val, err := m.Get("a")
+//	if err != nil {
+//		// error handling
+//	}
+//	parsed, err := val.Time()
+//	if err != nil {
+//		// error handling
+//	}
 func (m Map) Time(keys ...any) (time.Time, error) {
 	v, err := m.Get(keys...)
 	if err != nil {

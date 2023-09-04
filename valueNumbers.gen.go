@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Int returns the underlying data as a int.
 func (v Value) Int() (int, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -67,11 +68,9 @@ func (v Value) Int() (int, error) {
 	}
 }
 
-func (v Value) ListInt() ([]int, error) {
-	// TODO
-	return []int{ 0 }, nil
-}
 
+
+// MustInt is the error-ignoring version of Int.
 func (v Value) MustInt() int {
 	if val, err := v.Int(); err == nil {
 		return val
@@ -79,13 +78,9 @@ func (v Value) MustInt() int {
 	return 0
 }
 
-func (v Value) MustListInt() []int {
-	if val, err := v.ListInt(); err == nil {
-		return val
-	}
-	return []int{ 0 }
-}
 
+
+// Int8 returns the underlying data as a int8.
 func (v Value) Int8() (int8, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -145,11 +140,9 @@ func (v Value) Int8() (int8, error) {
 	}
 }
 
-func (v Value) ListInt8() ([]int8, error) {
-	// TODO
-	return []int8{ 0 }, nil
-}
 
+
+// MustInt8 is the error-ignoring version of Int8.
 func (v Value) MustInt8() int8 {
 	if val, err := v.Int8(); err == nil {
 		return val
@@ -157,13 +150,9 @@ func (v Value) MustInt8() int8 {
 	return 0
 }
 
-func (v Value) MustListInt8() []int8 {
-	if val, err := v.ListInt8(); err == nil {
-		return val
-	}
-	return []int8{ 0 }
-}
 
+
+// Int16 returns the underlying data as a int16.
 func (v Value) Int16() (int16, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -223,11 +212,9 @@ func (v Value) Int16() (int16, error) {
 	}
 }
 
-func (v Value) ListInt16() ([]int16, error) {
-	// TODO
-	return []int16{ 0 }, nil
-}
 
+
+// MustInt16 is the error-ignoring version of Int16.
 func (v Value) MustInt16() int16 {
 	if val, err := v.Int16(); err == nil {
 		return val
@@ -235,13 +222,9 @@ func (v Value) MustInt16() int16 {
 	return 0
 }
 
-func (v Value) MustListInt16() []int16 {
-	if val, err := v.ListInt16(); err == nil {
-		return val
-	}
-	return []int16{ 0 }
-}
 
+
+// Int32 returns the underlying data as a int32.
 func (v Value) Int32() (int32, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -301,11 +284,9 @@ func (v Value) Int32() (int32, error) {
 	}
 }
 
-func (v Value) ListInt32() ([]int32, error) {
-	// TODO
-	return []int32{ 0 }, nil
-}
 
+
+// MustInt32 is the error-ignoring version of Int32.
 func (v Value) MustInt32() int32 {
 	if val, err := v.Int32(); err == nil {
 		return val
@@ -313,13 +294,9 @@ func (v Value) MustInt32() int32 {
 	return 0
 }
 
-func (v Value) MustListInt32() []int32 {
-	if val, err := v.ListInt32(); err == nil {
-		return val
-	}
-	return []int32{ 0 }
-}
 
+
+// Int64 returns the underlying data as a int64.
 func (v Value) Int64() (int64, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -379,11 +356,9 @@ func (v Value) Int64() (int64, error) {
 	}
 }
 
-func (v Value) ListInt64() ([]int64, error) {
-	// TODO
-	return []int64{ 0 }, nil
-}
 
+
+// MustInt64 is the error-ignoring version of Int64.
 func (v Value) MustInt64() int64 {
 	if val, err := v.Int64(); err == nil {
 		return val
@@ -391,13 +366,9 @@ func (v Value) MustInt64() int64 {
 	return 0
 }
 
-func (v Value) MustListInt64() []int64 {
-	if val, err := v.ListInt64(); err == nil {
-		return val
-	}
-	return []int64{ 0 }
-}
 
+
+// Uint returns the underlying data as a uint.
 func (v Value) Uint() (uint, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -457,11 +428,9 @@ func (v Value) Uint() (uint, error) {
 	}
 }
 
-func (v Value) ListUint() ([]uint, error) {
-	// TODO
-	return []uint{ 0 }, nil
-}
 
+
+// MustUint is the error-ignoring version of Uint.
 func (v Value) MustUint() uint {
 	if val, err := v.Uint(); err == nil {
 		return val
@@ -469,13 +438,9 @@ func (v Value) MustUint() uint {
 	return 0
 }
 
-func (v Value) MustListUint() []uint {
-	if val, err := v.ListUint(); err == nil {
-		return val
-	}
-	return []uint{ 0 }
-}
 
+
+// Uint8 returns the underlying data as a uint8.
 func (v Value) Uint8() (uint8, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -535,11 +500,9 @@ func (v Value) Uint8() (uint8, error) {
 	}
 }
 
-func (v Value) ListUint8() ([]uint8, error) {
-	// TODO
-	return []uint8{ 0 }, nil
-}
 
+
+// MustUint8 is the error-ignoring version of Uint8.
 func (v Value) MustUint8() uint8 {
 	if val, err := v.Uint8(); err == nil {
 		return val
@@ -547,13 +510,9 @@ func (v Value) MustUint8() uint8 {
 	return 0
 }
 
-func (v Value) MustListUint8() []uint8 {
-	if val, err := v.ListUint8(); err == nil {
-		return val
-	}
-	return []uint8{ 0 }
-}
 
+
+// Uint16 returns the underlying data as a uint16.
 func (v Value) Uint16() (uint16, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -613,11 +572,9 @@ func (v Value) Uint16() (uint16, error) {
 	}
 }
 
-func (v Value) ListUint16() ([]uint16, error) {
-	// TODO
-	return []uint16{ 0 }, nil
-}
 
+
+// MustUint16 is the error-ignoring version of Uint16.
 func (v Value) MustUint16() uint16 {
 	if val, err := v.Uint16(); err == nil {
 		return val
@@ -625,13 +582,9 @@ func (v Value) MustUint16() uint16 {
 	return 0
 }
 
-func (v Value) MustListUint16() []uint16 {
-	if val, err := v.ListUint16(); err == nil {
-		return val
-	}
-	return []uint16{ 0 }
-}
 
+
+// Uint32 returns the underlying data as a uint32.
 func (v Value) Uint32() (uint32, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -691,11 +644,9 @@ func (v Value) Uint32() (uint32, error) {
 	}
 }
 
-func (v Value) ListUint32() ([]uint32, error) {
-	// TODO
-	return []uint32{ 0 }, nil
-}
 
+
+// MustUint32 is the error-ignoring version of Uint32.
 func (v Value) MustUint32() uint32 {
 	if val, err := v.Uint32(); err == nil {
 		return val
@@ -703,13 +654,9 @@ func (v Value) MustUint32() uint32 {
 	return 0
 }
 
-func (v Value) MustListUint32() []uint32 {
-	if val, err := v.ListUint32(); err == nil {
-		return val
-	}
-	return []uint32{ 0 }
-}
 
+
+// Uint64 returns the underlying data as a uint64.
 func (v Value) Uint64() (uint64, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -769,11 +716,9 @@ func (v Value) Uint64() (uint64, error) {
 	}
 }
 
-func (v Value) ListUint64() ([]uint64, error) {
-	// TODO
-	return []uint64{ 0 }, nil
-}
 
+
+// MustUint64 is the error-ignoring version of Uint64.
 func (v Value) MustUint64() uint64 {
 	if val, err := v.Uint64(); err == nil {
 		return val
@@ -781,13 +726,9 @@ func (v Value) MustUint64() uint64 {
 	return 0
 }
 
-func (v Value) MustListUint64() []uint64 {
-	if val, err := v.ListUint64(); err == nil {
-		return val
-	}
-	return []uint64{ 0 }
-}
 
+
+// Float32 returns the underlying data as a float32.
 func (v Value) Float32() (float32, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -840,11 +781,9 @@ func (v Value) Float32() (float32, error) {
 	}
 }
 
-func (v Value) ListFloat32() ([]float32, error) {
-	// TODO
-	return []float32{ 0 }, nil
-}
 
+
+// MustFloat32 is the error-ignoring version of Float32.
 func (v Value) MustFloat32() float32 {
 	if val, err := v.Float32(); err == nil {
 		return val
@@ -852,13 +791,9 @@ func (v Value) MustFloat32() float32 {
 	return 0
 }
 
-func (v Value) MustListFloat32() []float32 {
-	if val, err := v.ListFloat32(); err == nil {
-		return val
-	}
-	return []float32{ 0 }
-}
 
+
+// Float64 returns the underlying data as a float64.
 func (v Value) Float64() (float64, error) {
 	if v.Data == nil {
 		return 0, ErrValueIsNil
@@ -911,11 +846,9 @@ func (v Value) Float64() (float64, error) {
 	}
 }
 
-func (v Value) ListFloat64() ([]float64, error) {
-	// TODO
-	return []float64{ 0 }, nil
-}
 
+
+// MustFloat64 is the error-ignoring version of Float64.
 func (v Value) MustFloat64() float64 {
 	if val, err := v.Float64(); err == nil {
 		return val
@@ -923,10 +856,5 @@ func (v Value) MustFloat64() float64 {
 	return 0
 }
 
-func (v Value) MustListFloat64() []float64 {
-	if val, err := v.ListFloat64(); err == nil {
-		return val
-	}
-	return []float64{ 0 }
-}
+
 
