@@ -193,11 +193,15 @@ func TestMap_To(t *testing.T) {
 	type testStruct struct {
 		A int
 		B string
+		C string
+		D uint32
 	}
 
 	m, err := NewMap(map[string]any{
 		"A": 5,
 		"B": "lorem ipsum",
+		"C": 15,
+		"D": "6622",
 	})
 	require.Nil(t, err)
 
@@ -205,7 +209,43 @@ func TestMap_To(t *testing.T) {
 	require.Nil(t, m.To(&ts))
 	assert.Equal(t, 5, ts.A)
 	assert.Equal(t, "lorem ipsum", ts.B)
+	assert.Equal(t, "15", ts.C)
+	assert.Equal(t, uint32(6622), ts.D)
 
 	var ts2 testStruct
 	require.NotNil(t, m.To(ts2))
+}
+
+func TestMap_To_Tag(t *testing.T) {
+	type testStruct struct {
+		Number  int    `dataparse:"a"`
+		Message string `dataparse:"b"`
+		Varying string `dataparse:"varying,second_varying"`
+	}
+
+	m, err := NewMap(map[string]any{
+		"a":       5,
+		"b":       "lorem ipsum",
+		"varying": "sic dolor amet",
+	})
+	require.Nil(t, err)
+
+	var ts testStruct
+	require.Nil(t, m.To(&ts))
+	assert.Equal(t, 5, ts.Number)
+	assert.Equal(t, "lorem ipsum", ts.Message)
+	assert.Equal(t, "sic dolor amet", ts.Varying)
+
+	m2, err := NewMap(map[string]any{
+		"a":              5,
+		"b":              "lorem ipsum",
+		"second_varying": "sic dolor amet",
+	})
+	require.Nil(t, err)
+
+	var ts2 testStruct
+	require.Nil(t, m2.To(&ts2))
+	assert.Equal(t, 5, ts2.Number)
+	assert.Equal(t, "lorem ipsum", ts2.Message)
+	assert.Equal(t, "sic dolor amet", ts2.Varying)
 }

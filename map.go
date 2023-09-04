@@ -290,6 +290,28 @@ func (m Map) MustMap(keys ...any) Map {
 	return v
 }
 
+// To reads the map into a struct similar to json.Unmarshal, utilizing Value.To.
+// The passed variable must be a pointer to a struct.
+//
+// If no field tag `dataparse` is given the name of the field is
+// searched.
+// Multiple keys can be given, separated by a commata `,`:
+//
+//	type example struct {
+//		Field string `dataparse:"field1,field2"`
+//	}
+//
+// A field can be skipped by setting `dataparse:""`:
+//
+//	type example struct {
+//		Field string `dataparse:""`
+//	}
+//
+// Value.To uses the underlying field type to call the correct Value
+// method to transform the source value into the targeted struct field
+// type.
+// E.g. if the field type is string and the map contains a number the
+// field will contain a string with the number formatted in.
 func (m Map) To(dest any) error {
 	refV := reflect.ValueOf(dest)
 	if refV.Kind() != reflect.Pointer {
@@ -306,7 +328,16 @@ func (m Map) To(dest any) error {
 	for i := 0; i < refT.NumField(); i++ {
 		fieldRefT := refT.Field(i)
 
-		v, err := m.Get(fieldRefT.Name)
+		lookupKeys := []any{fieldRefT.Name}
+		if tags, ok := fieldRefT.Tag.Lookup("dataparse"); ok {
+			// skip the field on dataparse:""
+			if len(tags) == 0 {
+				continue
+			}
+			lookupKeys = ListToAny(strings.Split(tags, ","))
+		}
+
+		v, err := m.Get(lookupKeys...)
 		if err != nil {
 			return fmt.Errorf("dataparse: error getting field %q from map: %w",
 				fieldRefT.Name, err)
