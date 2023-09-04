@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	ErrValueIsNil = errors.New("dataparse: value is nil")
+	ErrValueIsNil        = errors.New("dataparse: value is nil")
+	ErrValueIsNotPointer = errors.New("dataparse: value is not pointer")
 )
 
 type ErrUnhandled struct {

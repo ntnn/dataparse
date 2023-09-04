@@ -289,3 +289,39 @@ func (m Map) MustMap(keys ...any) Map {
 	v, _ := m.Map(keys...)
 	return v
 }
+
+func (m Map) To(dest any) error {
+	refV := reflect.ValueOf(dest)
+	if refV.Kind() != reflect.Pointer {
+		return ErrValueIsNotPointer
+	}
+
+	if refV.IsNil() {
+		return ErrValueIsNil
+	}
+
+	refV = refV.Elem()
+	refT := refV.Type()
+
+	for i := 0; i < refT.NumField(); i++ {
+		fieldRefT := refT.Field(i)
+
+		v, err := m.Get(fieldRefT.Name)
+		if err != nil {
+			return fmt.Errorf("dataparse: error getting field %q from map: %w",
+				fieldRefT.Name, err)
+		}
+
+		fieldRefV := refV.Field(i)
+		if !fieldRefV.CanAddr() {
+			return fmt.Errorf("dataparse: field %q is not addressable", fieldRefT.Name)
+		}
+
+		if err := v.To(fieldRefV.Addr().Interface()); err != nil {
+			return fmt.Errorf("dataparse: error setting field %q from value %v: %w",
+				fieldRefT.Name, v, err)
+		}
+	}
+
+	return nil
+}

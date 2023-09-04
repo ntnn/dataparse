@@ -188,3 +188,24 @@ func TestNewMap(t *testing.T) {
 	assert.Equal(t, 5, m.MustGet("B").MustInt())
 
 }
+
+func TestMap_To(t *testing.T) {
+	type testStruct struct {
+		A int
+		B string
+	}
+
+	m, err := NewMap(map[string]any{
+		"A": 5,
+		"B": "lorem ipsum",
+	})
+	require.Nil(t, err)
+
+	var ts testStruct
+	require.Nil(t, m.To(&ts))
+	assert.Equal(t, 5, ts.A)
+	assert.Equal(t, "lorem ipsum", ts.B)
+
+	var ts2 testStruct
+	require.NotNil(t, m.To(ts2))
+}
