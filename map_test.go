@@ -249,3 +249,53 @@ func TestMap_To_Tag(t *testing.T) {
 	assert.Equal(t, "lorem ipsum", ts2.Message)
 	assert.Equal(t, "sic dolor amet", ts2.Varying)
 }
+
+func TestMap_To_Embedded(t *testing.T) {
+	type testStruct struct {
+		A int
+		B string `dataparse:"msg"`
+		C struct {
+			CA int
+			CB string `dataparse:"submsg"`
+		} `dataparse:"sub"`
+	}
+
+	m, err := NewMap(map[string]any{
+		"A":   3,
+		"msg": "outer",
+		"sub": map[string]any{
+			"CA":     15,
+			"submsg": "inner",
+		},
+	})
+	require.Nil(t, err)
+
+	var ts testStruct
+	require.Nil(t, m.To(&ts))
+	assert.Equal(t, 3, ts.A)
+	assert.Equal(t, "outer", ts.B)
+	assert.Equal(t, 15, ts.C.CA)
+	assert.Equal(t, "inner", ts.C.CB)
+}
+
+func TestMap_To_DotNotation(t *testing.T) {
+	type testStruct struct {
+		A int    `dataparse:"a.b"`
+		B string `dataparse:"msg.short"`
+	}
+
+	m, err := NewMap(map[string]any{
+		"a": map[string]any{
+			"b": 5,
+		},
+		"msg": map[string]any{
+			"short": "lorem ipsum",
+		},
+	})
+	require.Nil(t, err)
+
+	var ts testStruct
+	require.Nil(t, m.To(&ts))
+	assert.Equal(t, 5, ts.A)
+	assert.Equal(t, "lorem ipsum", ts.B)
+}

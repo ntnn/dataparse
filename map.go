@@ -279,13 +279,87 @@ func (m Map) Has(keys ...any) bool {
 // returns the first.
 // If no Value is found a dataparse.Value `nil` and an error is
 // returned.
+//
+// Nested value can be accessed by providing the keys separated with
+// dots.
+//
+// Example:
+//
+//	m, err := NewMap(map[string]any{
+//		"a": map[string]any{
+//			"b": map[string]any{
+//				"c": "lorem ipsum",
+//			},
+//		},
+//	})
+//	if err != nil {
+//		return err
+//	}
+//	v, err := m.Get("a.b.c")
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf(v.MustString())
+//
+// Will print "lorem ipsum".
+//
+// Not than errors from attempting to convert Values to Maps are
+// returned as stdlib multierrors and only when no match is found.
 func (m Map) Get(keys ...any) (Value, error) {
+	var errs error
 	for _, key := range keys {
-		if v, ok := m[key]; ok {
-			return NewValue(v), nil
+		switch typed := key.(type) {
+		case string:
+			if !strings.Contains(typed, ".") {
+				if v, ok := m[key]; ok {
+					return NewValue(v), nil
+				}
+			} else {
+				splitKey := strings.SplitN(typed, ".", 2)
+				if len(splitKey) != 2 {
+					errs = errors.Join(
+						errs,
+						fmt.Errorf(
+							"dataparse: splitn on %q with . did not produce exactly two values",
+							typed,
+						),
+					)
+					continue
+				}
+
+				v, ok := m[splitKey[0]]
+				if !ok {
+					continue
+				}
+
+				subM, err := NewValue(v).Map()
+				if err != nil {
+					errs = errors.Join(
+						errs,
+						fmt.Errorf(
+							"dataparse: key %q indicated nested maps but value at key %q cannot be converted to map: %#v",
+							typed,
+							splitKey[0],
+							v,
+						),
+					)
+					continue
+				}
+
+				ret, err := subM.Get(splitKey[1])
+				if err != nil {
+					errs = errors.Join(errs, err)
+					continue
+				}
+				return ret, nil
+			}
+		default:
+			if v, ok := m[key]; ok {
+				return NewValue(v), nil
+			}
 		}
 	}
-	return NewValue(nil), fmt.Errorf("dataparse: no valid key: %v", keys)
+	return NewValue(nil), errors.Join(errs, fmt.Errorf("dataparse: no valid key: %v", keys))
 }
 
 // MustGet is the error-ignoring version of Get.
