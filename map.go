@@ -303,63 +303,96 @@ func (m Map) Has(keys ...any) bool {
 //
 // Will print "lorem ipsum".
 //
-// Not than errors from attempting to convert Values to Maps are
-// returned as stdlib multierrors and only when no match is found.
+// Note: Errors from attempting to convert Values to Maps are returned
+// as stdlib multierrors and only when no match is found.
+//
+// Note: The entire key including dots is tested as well and the value
+// returned if it exists.
+// Example:
+//
+//	m, err := NewMap(map[string]any{
+//		"a.b.c": "dolor sic amet",
+//	})
+//	if err != nil {
+//		return err
+//	}
+//	m2, err := NewMap(map[string]any{
+//		"a": map[string]any{
+//			"b": map[string]any{
+//				"c": "lorem ipsum",
+//			},
+//		},
+//		"a.b.c": "dolor sic amet",
+//	})
+//	if err != nil {
+//		return err
+//	}
+//	v, err := m.Get("a.b.c")
+//	if err != nil {
+//		return err
+//	}
+//	v2, err := m2.Get("a.b.c")
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf(v.MustString())
+//	fmt.Printf(v2.MustString())
+//
+// Will print "dolor sic amet" and "lorem ipsum".
 func (m Map) Get(keys ...any) (Value, error) {
 	var errs error
 	for _, key := range keys {
-		switch typed := key.(type) {
-		case string:
-			if !strings.Contains(typed, ".") {
-				if v, ok := m[key]; ok {
-					return NewValue(v), nil
-				}
-			} else {
-				splitKey := strings.SplitN(typed, ".", 2)
-				if len(splitKey) != 2 {
-					errs = errors.Join(
-						errs,
-						fmt.Errorf(
-							"dataparse: splitn on %q with . did not produce exactly two values",
-							typed,
-						),
-					)
-					continue
-				}
+		b, v, err := m.get(key)
+		if err != nil {
+			errs = errors.Join(errs, err)
+		}
+		if b {
+			return v, nil
+		}
 
-				v, ok := m[splitKey[0]]
-				if !ok {
-					continue
-				}
-
-				subM, err := NewValue(v).Map()
-				if err != nil {
-					errs = errors.Join(
-						errs,
-						fmt.Errorf(
-							"dataparse: key %q indicated nested maps but value at key %q cannot be converted to map: %#v",
-							typed,
-							splitKey[0],
-							v,
-						),
-					)
-					continue
-				}
-
-				ret, err := subM.Get(splitKey[1])
-				if err != nil {
-					errs = errors.Join(errs, err)
-					continue
-				}
-				return ret, nil
-			}
-		default:
-			if v, ok := m[key]; ok {
-				return NewValue(v), nil
-			}
+		if v, ok := m[key]; ok {
+			return NewValue(v), nil
 		}
 	}
+
 	return NewValue(nil), errors.Join(errs, fmt.Errorf("dataparse: no valid key: %v", keys))
+}
+
+func (m Map) get(key any) (bool, Value, error) {
+	switch typed := key.(type) {
+	case string:
+		if strings.Contains(typed, ".") {
+			splitKey := strings.SplitN(typed, ".", 2)
+			if len(splitKey) != 2 {
+				return false, NewValue(nil), fmt.Errorf(
+					"dataparse: splitn on %q with . did not produce exactly two values",
+					typed,
+				)
+			}
+
+			v, ok := m[splitKey[0]]
+			if !ok {
+				return false, NewValue(nil), nil
+			}
+
+			subM, err := NewValue(v).Map()
+			if err != nil {
+				return false, NewValue(nil), fmt.Errorf(
+					"dataparse: key %q indicated nested maps but value at key %q cannot be converted to map: %#v",
+					typed,
+					splitKey[0],
+					v,
+				)
+			}
+
+			ret, err := subM.Get(splitKey[1])
+			if err != nil {
+				return false, NewValue(nil), nil
+			}
+			return true, ret, nil
+		}
+	}
+	return false, NewValue(nil), nil
 }
 
 // MustGet is the error-ignoring version of Get.
