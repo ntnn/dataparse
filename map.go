@@ -51,7 +51,7 @@ func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 	}
 
 	if reader != cfg.reader {
-		ext = filepath.Ext(filepath.Ext(path))
+		ext = filepath.Ext(strings.TrimSuffix(path, filepath.Ext(path)))
 	}
 
 	var fn func(cfg *fromConfig) (chan Map, chan error)

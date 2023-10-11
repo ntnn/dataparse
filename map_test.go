@@ -1,7 +1,10 @@
 package dataparse
 
 import (
+	"compress/gzip"
+	"io"
 	"net"
+	"os"
 	"testing"
 	"time"
 
@@ -11,6 +14,67 @@ import (
 
 func TestFrom_Json(t *testing.T) {
 	maps, errs, err := From("./testdata/data.json")
+	require.Nil(t, err)
+	for err := range errs {
+		require.Nil(t, err)
+	}
+
+	m := <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, "Garrott", m.MustGet("first_name").MustString())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, "Vasovic", m.MustGet("last_name").MustString())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t, 3, m.MustGet("id").MustInt())
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t,
+		time.Date(2023, time.June, 20, 23, 34, 57, 0, time.UTC),
+		m.MustGet("timestamp").MustTime(),
+	)
+
+	m = <-maps
+	require.NotNil(t, m)
+	assert.Equal(t,
+		net.ParseIP("166.215.142.79"),
+		m.MustGet("ip_address").MustIP(),
+	)
+}
+
+func gzipFile(t *testing.T, target string) {
+	// Skip zipping a file that was already zipped
+	if _, err := os.Stat(target + ".gz"); err == nil {
+		return
+	}
+
+	out, err := os.Create(target + ".gz")
+	require.Nil(t, err)
+	defer func() {
+		require.Nil(t, out.Close())
+	}()
+
+	gzipOut := gzip.NewWriter(out)
+	defer func() {
+		assert.Nil(t, gzipOut.Flush())
+		require.Nil(t, gzipOut.Close())
+	}()
+
+	reader, err := os.Open(target)
+	require.Nil(t, err)
+
+	_, err = io.Copy(gzipOut, reader)
+	require.Nil(t, err)
+}
+
+func TestFrom_JsonGz(t *testing.T) {
+	gzipFile(t, "./testdata/data.json")
+
+	maps, errs, err := From("./testdata/data.json.gz")
 	require.Nil(t, err)
 	for err := range errs {
 		require.Nil(t, err)
