@@ -417,18 +417,62 @@ func (m Map) MustMap(keys ...any) Map {
 	return v
 }
 
+type mapToConfig struct {
+	lookupFieldName      bool
+	skipFieldsWithoutTag bool
+}
+
+func newMapToConfig() *mapToConfig {
+	cfg := new(mapToConfig)
+	cfg.lookupFieldName = true
+	return cfg
+}
+
+type MapToOption func(*mapToConfig)
+
+// WithLookupFieldName configures Map.To to try to lookup the field name
+// in addition to any names given in the dataparse tag.
+//
+// If this option is set the field name will be looked up after any
+// names in the dataparse tag.
+//
+// The default is true.
+func WithLookupFieldName(lookupFieldName bool) MapToOption {
+	return func(cfg *mapToConfig) {
+		cfg.lookupFieldName = lookupFieldName
+	}
+}
+
+// WithSkipFieldsWithoutTag configures Map.To to skip fields without
+// explicit tags.
+//
+// Note that this also skip fields without an explicit dataparse tag if
+// WithLookupFieldName is set.
+//
+// The default is false.
+func WithSkipFieldsWithoutTag() MapToOption {
+	return func(cfg *mapToConfig) {
+		cfg.skipFieldsWithoutTag = true
+	}
+}
+
 // To reads the map into a struct similar to json.Unmarshal, utilizing Value.To.
 // The passed variable must be a pointer to a struct.
 //
-// If no field tag `dataparse` is given the name of the field is
-// searched.
 // Multiple keys can be given, separated by a commata `,`:
 //
 //	type example struct {
 //		Field string `dataparse:"field1,field2"`
 //	}
 //
-// A field can be skipped by setting `dataparse:""`:
+// By default the field name is looked up if any fields in the dataparse
+// tag are not found.
+//
+// By default it is an error if a struct field cannot be found in the
+// Map.
+// Fields without a dataparse tag can be skipped implicitly by passing
+// the option WithSkipFieldsWithoutTag or explicitly by settings
+// `dataparse:""`:
 //
 //	type example struct {
 //		Field string `dataparse:""`
@@ -439,7 +483,12 @@ func (m Map) MustMap(keys ...any) Map {
 // type.
 // E.g. if the field type is string and the map contains a number the
 // field will contain a string with the number formatted in.
-func (m Map) To(dest any) error {
+func (m Map) To(dest any, opts ...MapToOption) error {
+	cfg := newMapToConfig()
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
 	refV := reflect.ValueOf(dest)
 	if refV.Kind() != reflect.Pointer {
 		return ErrValueIsNotPointer
@@ -456,12 +505,27 @@ func (m Map) To(dest any) error {
 		fieldRefT := refT.Field(i)
 
 		lookupKeys := []any{fieldRefT.Name}
-		if tags, ok := fieldRefT.Tag.Lookup("dataparse"); ok {
+
+		tags, ok := fieldRefT.Tag.Lookup("dataparse")
+		if !ok && cfg.skipFieldsWithoutTag {
+			continue
+		}
+
+		if ok {
 			// skip the field on dataparse:""
 			if len(tags) == 0 {
 				continue
 			}
 			lookupKeys = ListToAny(strings.Split(tags, ","))
+		}
+
+		if cfg.lookupFieldName {
+			lookupKeys = append(lookupKeys, fieldRefT.Name)
+		}
+
+		if len(lookupKeys) == 0 {
+			return fmt.Errorf("dataparse: no keys found to lookup for field %q, this error can be prevented by passing WithSkipFieldsWithoutTag",
+				fieldRefT.Name)
 		}
 
 		v, err := m.Get(lookupKeys...)
