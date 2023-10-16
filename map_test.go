@@ -280,6 +280,33 @@ func TestMap_To(t *testing.T) {
 	require.NotNil(t, m.To(ts2))
 }
 
+func TestMap_To_FieldPtr(t *testing.T) {
+	type testStruct struct {
+		A int
+		B string
+		C *string
+		D *uint32
+	}
+
+	m, err := NewMap(map[string]any{
+		"A": 5,
+		"B": "lorem ipsum",
+		"C": 15,
+		"D": "6622",
+	})
+	require.Nil(t, err)
+
+	var ts testStruct
+	require.Nil(t, m.To(&ts))
+	assert.Equal(t, 5, ts.A)
+	assert.Equal(t, "lorem ipsum", ts.B)
+	assert.Equal(t, "15", *ts.C)
+	assert.Equal(t, uint32(6622), *ts.D)
+
+	var ts2 testStruct
+	require.NotNil(t, m.To(ts2))
+}
+
 func TestMap_To_Tag(t *testing.T) {
 	type testStruct struct {
 		Number  int    `dataparse:"a"`
