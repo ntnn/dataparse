@@ -355,7 +355,7 @@ func (m Map) Get(keys ...any) (Value, error) {
 		}
 	}
 
-	return NewValue(nil), errors.Join(errs, fmt.Errorf("dataparse: no valid key: %v", keys))
+	return NewValue(nil), errors.Join(errs, NewErrNoValidKey(keys))
 }
 
 func (m Map) get(key any) (bool, Value, error) {
@@ -418,8 +418,9 @@ func (m Map) MustMap(keys ...any) Map {
 }
 
 type mapToConfig struct {
-	lookupFieldName      bool
-	skipFieldsWithoutTag bool
+	lookupFieldName       bool
+	skipFieldsWithoutTag  bool
+	ignoreNoValidKeyError bool
 }
 
 func newMapToConfig() *mapToConfig {
@@ -453,6 +454,20 @@ func WithLookupFieldName(lookupFieldName bool) MapToOption {
 func WithSkipFieldsWithoutTag() MapToOption {
 	return func(cfg *mapToConfig) {
 		cfg.skipFieldsWithoutTag = true
+	}
+}
+
+// WithIgnoreNoValidKeyError configures Map.To to ignore errors when no
+// field could by found by the configured tags.
+//
+// This is primarily useful for inconsistent input or when using the
+// same structure to parse data from different sources with different
+// properties.
+//
+// The default is false.
+func WithIgnoreNoValidKeyError() MapToOption {
+	return func(cfg *mapToConfig) {
+		cfg.ignoreNoValidKeyError = true
 	}
 }
 
@@ -530,6 +545,9 @@ func (m Map) To(dest any, opts ...MapToOption) error {
 
 		v, err := m.Get(lookupKeys...)
 		if err != nil {
+			if cfg.ignoreNoValidKeyError && errors.As(err, &ErrNoValidKey{}) {
+				continue
+			}
 			return fmt.Errorf("dataparse: error getting field %q from map: %w",
 				fieldRefT.Name, err)
 		}
