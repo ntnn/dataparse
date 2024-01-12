@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"time"
 )
 
 // Value is one of the two central types in dataparse.
@@ -39,6 +40,12 @@ func (v Value) To(other any) error {
 	case **string:
 		var p string
 		p, err = v.String()
+		*typed = &p
+	case *[]string:
+		*typed, err = v.ListString(",")
+	case **[]string:
+		var p []string
+		p, err = v.ListString(",")
 		*typed = &p
 	case *int:
 		*typed, err = v.Int()
@@ -124,6 +131,12 @@ func (v Value) To(other any) error {
 		var p net.IP
 		p, err = v.IP()
 		*typed = &p
+	case *time.Time:
+		*typed, err = v.Time()
+	case **time.Time:
+		var t time.Time
+		t, err = v.Time()
+		*typed = &t
 	// case *byte:
 	// 	*typed = v.MustByte()
 	// case *[]byte:
