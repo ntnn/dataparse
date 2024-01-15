@@ -18,6 +18,10 @@ func (v Value) Bool() (bool, error) {
 		s = fmt.Sprintf("%v", v.Data)
 	}
 
+	if s == "" {
+		return false, nil
+	}
+
 	b, err := strconv.ParseBool(s)
 	if err != nil {
 		return false, fmt.Errorf("dataparse: error parsing bool from %q: %w", s, err)
