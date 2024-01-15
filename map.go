@@ -417,19 +417,19 @@ func (m Map) MustMap(keys ...any) Map {
 	return v
 }
 
-type mapToConfig struct {
+type toConfig struct {
 	lookupFieldName       bool
 	skipFieldsWithoutTag  bool
 	ignoreNoValidKeyError bool
 }
 
-func newMapToConfig() *mapToConfig {
-	cfg := new(mapToConfig)
+func newToConfig() *toConfig {
+	cfg := new(toConfig)
 	cfg.lookupFieldName = true
 	return cfg
 }
 
-type MapToOption func(*mapToConfig)
+type ToOption func(*toConfig)
 
 // WithLookupFieldName configures Map.To to try to lookup the field name
 // in addition to any names given in the dataparse tag.
@@ -438,8 +438,8 @@ type MapToOption func(*mapToConfig)
 // names in the dataparse tag.
 //
 // The default is true.
-func WithLookupFieldName(lookupFieldName bool) MapToOption {
-	return func(cfg *mapToConfig) {
+func WithLookupFieldName(lookupFieldName bool) ToOption {
+	return func(cfg *toConfig) {
 		cfg.lookupFieldName = lookupFieldName
 	}
 }
@@ -451,8 +451,8 @@ func WithLookupFieldName(lookupFieldName bool) MapToOption {
 // WithLookupFieldName is set.
 //
 // The default is false.
-func WithSkipFieldsWithoutTag() MapToOption {
-	return func(cfg *mapToConfig) {
+func WithSkipFieldsWithoutTag() ToOption {
+	return func(cfg *toConfig) {
 		cfg.skipFieldsWithoutTag = true
 	}
 }
@@ -465,8 +465,8 @@ func WithSkipFieldsWithoutTag() MapToOption {
 // properties.
 //
 // The default is false.
-func WithIgnoreNoValidKeyError() MapToOption {
-	return func(cfg *mapToConfig) {
+func WithIgnoreNoValidKeyError() ToOption {
+	return func(cfg *toConfig) {
 		cfg.ignoreNoValidKeyError = true
 	}
 }
@@ -498,8 +498,8 @@ func WithIgnoreNoValidKeyError() MapToOption {
 // type.
 // E.g. if the field type is string and the map contains a number the
 // field will contain a string with the number formatted in.
-func (m Map) To(dest any, opts ...MapToOption) error {
-	cfg := newMapToConfig()
+func (m Map) To(dest any, opts ...ToOption) error {
+	cfg := newToConfig()
 	for _, opt := range opts {
 		opt(cfg)
 	}
@@ -560,7 +560,7 @@ func (m Map) To(dest any, opts ...MapToOption) error {
 			return fmt.Errorf("dataparse: field %q is not addressable", fieldRefT.Name)
 		}
 
-		if err := v.To(fieldRefV.Addr().Interface()); err != nil {
+		if err := v.To(fieldRefV.Addr().Interface(), opts...); err != nil {
 			return fmt.Errorf("dataparse: error setting field %q from value %v: %w",
 				fieldRefT.Name, v, err)
 		}

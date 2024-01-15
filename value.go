@@ -39,7 +39,7 @@ type Fromer interface {
 //
 // If the parameter satisfies the Fromer interface it will be used to
 // set the value.
-func (v Value) To(other any) error {
+func (v Value) To(other any, opts ...ToOption) error {
 	if fromer, ok := other.(Fromer); ok {
 		return fromer.From(v)
 	}
@@ -82,7 +82,7 @@ func (v Value) To(other any) error {
 		)
 
 		for i, v := range vs {
-			if err := v.To(converts.Index(i).Addr().Interface()); err != nil {
+			if err := v.To(converts.Index(i).Addr().Interface(), opts...); err != nil {
 				return err
 			}
 		}
@@ -98,7 +98,7 @@ func (v Value) To(other any) error {
 		if err != nil {
 			return err
 		}
-		return m.To(other)
+		return m.To(other, opts...)
 	}
 
 	var newValue any
@@ -107,8 +107,6 @@ func (v Value) To(other any) error {
 	switch typed := target.Interface().(type) {
 	case string:
 		newValue, err = v.String()
-	case []string:
-		newValue, err = v.ListString(",")
 	case int:
 		newValue, err = v.Int()
 	case int8:
