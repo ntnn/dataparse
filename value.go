@@ -66,6 +66,31 @@ func (v Value) To(other any) error {
 		target = target.Elem()
 	}
 
+	// handle slices but skip named types (like net.IP which is
+	// a []byte)
+	if target.Type().Name() == "" && target.Kind() == reflect.Slice || target.Kind() == reflect.Array {
+		vs, err := v.List()
+		if err != nil {
+			return fmt.Errorf("dataparse: target is a slice, error converting %T to slice: %w",
+				v.Data, err)
+		}
+
+		converts := reflect.MakeSlice(
+			target.Type(),
+			len(vs),
+			len(vs),
+		)
+
+		for i, v := range vs {
+			if err := v.To(converts.Index(i).Addr().Interface()); err != nil {
+				return err
+			}
+		}
+
+		target.Set(converts)
+		return nil
+	}
+
 	// If the passed value is a pointer to a struct try
 	// converting Value to map and call .To
 	if target.Kind() == reflect.Struct {

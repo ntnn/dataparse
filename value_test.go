@@ -129,6 +129,25 @@ func TestValue_To(t *testing.T) {
 	assert.Equal(t, testValueToConst3, c)
 }
 
+func TestValue_To_Slice(t *testing.T) {
+	v := NewValue([]int{1, 2, 3})
+	s := []int{}
+
+	require.Nil(t, v.To(&s))
+	require.Equal(t, 3, len(s))
+	assert.Equal(t, 2, s[1])
+}
+
+func TestValue_To_PtrSlice(t *testing.T) {
+	v := NewValue([]int{1, 2, 3})
+	s := []int{}
+	sPtr := &s
+
+	require.Nil(t, v.To(&sPtr))
+	require.Equal(t, 3, len(s))
+	assert.Equal(t, 2, s[1])
+}
+
 func TestValue_List(t *testing.T) {
 	v, err := NewValue([]int{1, 2, 3}).List()
 	assert.Nil(t, err)
