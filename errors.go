@@ -8,6 +8,7 @@ import (
 var (
 	ErrValueIsNil        = errors.New("dataparse: value is nil")
 	ErrValueIsNotPointer = errors.New("dataparse: value is not pointer")
+	ErrValueCannotBeSet  = errors.New("dataparse: value cannot be set")
 )
 
 // ErrUnhandled is returned as an error if the underlying type is not
