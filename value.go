@@ -25,6 +25,10 @@ func (v Value) IsNil() bool {
 	return v.Data == nil
 }
 
+type Fromer interface {
+	From(Value) error
+}
+
 // To transforms the stored data into the target type and returns any
 // occurring errors.
 //
@@ -32,128 +36,97 @@ func (v Value) IsNil() bool {
 //
 // To utilizes the various transformation methods and returns their
 // errors.
+//
+// If the parameter satisfies the Fromer interface it will be used to
+// set the value.
 func (v Value) To(other any) error {
-	var err error
-	switch typed := other.(type) {
-	case *string:
-		*typed, err = v.String()
-	case **string:
-		var p string
-		p, err = v.String()
-		*typed = &p
-	case *[]string:
-		*typed, err = v.ListString(",")
-	case **[]string:
-		var p []string
-		p, err = v.ListString(",")
-		*typed = &p
-	case *int:
-		*typed, err = v.Int()
-	case **int:
-		var p int
-		p, err = v.Int()
-		*typed = &p
-	case *int8:
-		*typed, err = v.Int8()
-	case **int8:
-		var p int8
-		p, err = v.Int8()
-		*typed = &p
-	case *int16:
-		*typed, err = v.Int16()
-	case **int16:
-		var p int16
-		p, err = v.Int16()
-		*typed = &p
-	case *int32:
-		*typed, err = v.Int32()
-	case **int32:
-		var p int32
-		p, err = v.Int32()
-		*typed = &p
-	case *int64:
-		*typed, err = v.Int64()
-	case **int64:
-		var p int64
-		p, err = v.Int64()
-		*typed = &p
-	case *uint:
-		*typed, err = v.Uint()
-	case **uint:
-		var p uint
-		p, err = v.Uint()
-		*typed = &p
-	case *uint8:
-		*typed, err = v.Uint8()
-	case **uint8:
-		var p uint8
-		p, err = v.Uint8()
-		*typed = &p
-	case *uint16:
-		*typed, err = v.Uint16()
-	case **uint16:
-		var p uint16
-		p, err = v.Uint16()
-		*typed = &p
-	case *uint32:
-		*typed, err = v.Uint32()
-	case **uint32:
-		var p uint32
-		p, err = v.Uint32()
-		*typed = &p
-	case *uint64:
-		*typed, err = v.Uint64()
-	case **uint64:
-		var p uint64
-		p, err = v.Uint64()
-		*typed = &p
-	case *float32:
-		*typed, err = v.Float32()
-	case **float32:
-		var p float32
-		p, err = v.Float32()
-		*typed = &p
-	case *float64:
-		*typed, err = v.Float64()
-	case **float64:
-		var p float64
-		p, err = v.Float64()
-		*typed = &p
-	case *bool:
-		*typed, err = v.Bool()
-	case **bool:
-		var p bool
-		p, err = v.Bool()
-		*typed = &p
-	case *net.IP:
-		*typed, err = v.IP()
-	case **net.IP:
-		var p net.IP
-		p, err = v.IP()
-		*typed = &p
-	case *time.Time:
-		*typed, err = v.Time()
-	case **time.Time:
-		var t time.Time
-		t, err = v.Time()
-		*typed = &t
-	// case *byte:
-	// 	*typed = v.MustByte()
-	// case *[]byte:
-	// 	*typed = v.MustBytes()
-	default:
-		// If the passed value is a pointer to a struct try
-		// converting Value to map and call .To
-		if reflect.ValueOf(other).Elem().Kind() == reflect.Struct {
-			m, err := v.Map()
-			if err != nil {
-				return err
-			}
-			return m.To(other)
-		}
-		return fmt.Errorf("dataparse: unhandled type: %T", other)
+	if fromer, ok := other.(Fromer); ok {
+		return fromer.From(v)
 	}
-	return err
+
+	target := reflect.ValueOf(other)
+
+	if target.Kind() != reflect.Pointer {
+		return ErrValueIsNotPointer
+	}
+
+	// dereference until the target is a pointer but the value pointer
+	// to is not
+	// for target.Kind() == reflect.Pointer && target.Elem().Kind() == reflect.Pointer {
+	for target.Kind() == reflect.Pointer {
+		if target.IsNil() {
+			// initialize pointer with a valid value
+			target.Set(reflect.New(target.Type().Elem()))
+		}
+		// handle pointers to constants or structs that satisfy the
+		// Fromer interface
+		if fromer, ok := target.Interface().(Fromer); ok {
+			return fromer.From(v)
+		}
+		target = target.Elem()
+	}
+
+	// If the passed value is a pointer to a struct try
+	// converting Value to map and call .To
+	if target.Kind() == reflect.Struct {
+		m, err := v.Map()
+		if err != nil {
+			return err
+		}
+		return m.To(other)
+	}
+
+	var newValue any
+	var err error
+
+	switch typed := target.Interface().(type) {
+	case string:
+		newValue, err = v.String()
+	case []string:
+		newValue, err = v.ListString(",")
+	case int:
+		newValue, err = v.Int()
+	case int8:
+		newValue, err = v.Int8()
+	case int16:
+		newValue, err = v.Int16()
+	case int32:
+		newValue, err = v.Int32()
+	case int64:
+		newValue, err = v.Int64()
+	case uint:
+		newValue, err = v.Uint()
+	case uint8:
+		newValue, err = v.Uint8()
+	case uint16:
+		newValue, err = v.Uint16()
+	case uint32:
+		newValue, err = v.Uint32()
+	case uint64:
+		newValue, err = v.Uint64()
+	case float32:
+		newValue, err = v.Float32()
+	case float64:
+		newValue, err = v.Float64()
+	case bool:
+		newValue, err = v.Bool()
+	case net.IP:
+		newValue, err = v.IP()
+	case time.Time:
+		newValue, err = v.Time()
+		// case *byte:
+		// 	*typed = v.MustByte()
+		// case *[]byte:
+		// 	*typed = v.MustBytes()
+	default:
+		return fmt.Errorf("dataparse: unhandled type: %T", typed)
+	}
+	if err != nil {
+		return err
+	}
+
+	target.Set(reflect.ValueOf(newValue))
+	return nil
 }
 
 // List returns the underlying data as a slice of Values.

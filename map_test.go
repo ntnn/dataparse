@@ -341,7 +341,35 @@ func TestMap_To_Tag(t *testing.T) {
 	assert.Equal(t, "sic dolor amet", ts2.Varying)
 }
 
-func TestMap_To_Embedded(t *testing.T) {
+func TestMap_To_AnonStructPtr(t *testing.T) {
+	type testStruct struct {
+		A int
+		B string `dataparse:"msg"`
+		C *struct {
+			CA int
+			CB string `dataparse:"submsg"`
+		} `dataparse:"sub"`
+	}
+
+	m, err := NewMap(map[string]any{
+		"A":   3,
+		"msg": "outer",
+		"sub": map[string]any{
+			"CA":     15,
+			"submsg": "inner",
+		},
+	})
+	require.Nil(t, err)
+
+	var ts testStruct
+	require.Nil(t, m.To(&ts))
+	assert.Equal(t, 3, ts.A)
+	assert.Equal(t, "outer", ts.B)
+	assert.Equal(t, 15, ts.C.CA)
+	assert.Equal(t, "inner", ts.C.CB)
+}
+
+func TestMap_To_AnonStruct(t *testing.T) {
 	type testStruct struct {
 		A int
 		B string `dataparse:"msg"`
@@ -389,4 +417,58 @@ func TestMap_To_DotNotation(t *testing.T) {
 	require.Nil(t, m.To(&ts))
 	assert.Equal(t, 5, ts.A)
 	assert.Equal(t, "lorem ipsum", ts.B)
+}
+
+type testMapValueToConst int
+
+const (
+	testMapValueToConst1 testMapValueToConst = iota
+	testMapValueToConst2
+	testMapValueToConst3
+	testMapValueToConst4
+	testMapValueToConst5
+)
+
+func (c *testMapValueToConst) From(v Value) error {
+	i, err := v.Int()
+	if err != nil {
+		return err
+	}
+
+	*c = testMapValueToConst(i)
+	return nil
+}
+
+func TestMap_To_Const(t *testing.T) {
+	type testStruct struct {
+		A testMapValueToConst `dataparse:"a.b"`
+	}
+
+	m, err := NewMap(map[string]any{
+		"a": map[string]any{
+			"b": 2,
+		},
+	})
+	require.Nil(t, err)
+
+	var ts testStruct
+	require.Nil(t, m.To(&ts))
+	assert.Equal(t, testMapValueToConst3, ts.A)
+}
+
+func TestMap_To_PtrConst(t *testing.T) {
+	type testStruct struct {
+		A *testMapValueToConst `dataparse:"a.b"`
+	}
+
+	m, err := NewMap(map[string]any{
+		"a": map[string]any{
+			"b": 2,
+		},
+	})
+	require.Nil(t, err)
+
+	var ts testStruct
+	require.Nil(t, m.To(&ts))
+	assert.Equal(t, testMapValueToConst3, *ts.A)
 }

@@ -70,12 +70,39 @@ func (v *Value) Fuzz(c fuzz.Continue) {
 	}
 }
 
+type testValueToConst int
+
+const (
+	testValueToConst1 testValueToConst = iota
+	testValueToConst2
+	testValueToConst3
+	testValueToConst4
+	testValueToConst5
+)
+
+func (c *testValueToConst) From(v Value) error {
+	i, err := v.Int()
+	if err != nil {
+		return err
+	}
+
+	*c = testValueToConst(i)
+	return nil
+}
+
 func TestValue_To(t *testing.T) {
+	// test passing pointer
 	v := NewValue("test")
 	s := ""
 	require.Nil(t, v.To(&s))
 	assert.Equal(t, "test", s)
 
+	// test passing pointer of pointer
+	var s2 *string
+	require.Nil(t, v.To(&s2))
+	assert.Equal(t, "test", *s2)
+
+	// test some random types
 	v = NewValue(5)
 	var i int = 0
 	require.Nil(t, v.To(&i))
@@ -95,6 +122,11 @@ func TestValue_To(t *testing.T) {
 	var ip net.IP
 	require.Nil(t, v.To(&ip))
 	assert.Equal(t, net.ParseIP("192.168.1.1"), ip)
+
+	v = NewValue(2)
+	var c testValueToConst
+	require.Nil(t, v.To(&c))
+	assert.Equal(t, testValueToConst3, c)
 }
 
 func TestValue_List(t *testing.T) {
