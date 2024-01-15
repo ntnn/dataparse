@@ -513,7 +513,10 @@ func (m Map) To(dest any, opts ...MapToOption) error {
 		return ErrValueIsNil
 	}
 
-	refV = refV.Elem()
+	for refV.Kind() == reflect.Pointer {
+		refV = refV.Elem()
+	}
+
 	refT := refV.Type()
 
 	for i := 0; i < refT.NumField(); i++ {
