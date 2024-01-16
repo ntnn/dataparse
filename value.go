@@ -91,16 +91,6 @@ func (v Value) To(other any, opts ...ToOption) error {
 		return nil
 	}
 
-	// If the passed value is a pointer to a struct try
-	// converting Value to map and call .To
-	if target.Kind() == reflect.Struct {
-		m, err := v.Map()
-		if err != nil {
-			return err
-		}
-		return m.To(other, opts...)
-	}
-
 	var newValue any
 	var err error
 
@@ -142,6 +132,15 @@ func (v Value) To(other any, opts ...ToOption) error {
 		// case *[]byte:
 		// 	*typed = v.MustBytes()
 	default:
+		// If the passed value is a pointer to a struct try
+		// converting Value to map and call .To
+		if target.Kind() == reflect.Struct {
+			m, err := v.Map()
+			if err != nil {
+				return err
+			}
+			return m.To(other, opts...)
+		}
 		return fmt.Errorf("dataparse: unhandled type: %T", typed)
 	}
 	if err != nil {
