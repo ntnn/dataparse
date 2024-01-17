@@ -39,6 +39,7 @@ func (v Value) Int() (int, error) {
 	case float64:
 		return int(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -111,6 +112,7 @@ func (v Value) Int8() (int8, error) {
 	case float64:
 		return int8(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -183,6 +185,7 @@ func (v Value) Int16() (int16, error) {
 	case float64:
 		return int16(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -255,6 +258,7 @@ func (v Value) Int32() (int32, error) {
 	case float64:
 		return int32(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -327,6 +331,7 @@ func (v Value) Int64() (int64, error) {
 	case float64:
 		return int64(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -399,6 +404,7 @@ func (v Value) Uint() (uint, error) {
 	case float64:
 		return uint(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -471,6 +477,7 @@ func (v Value) Uint8() (uint8, error) {
 	case float64:
 		return uint8(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -543,6 +550,7 @@ func (v Value) Uint16() (uint16, error) {
 	case float64:
 		return uint16(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -615,6 +623,7 @@ func (v Value) Uint32() (uint32, error) {
 	case float64:
 		return uint32(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -687,6 +696,7 @@ func (v Value) Uint64() (uint64, error) {
 	case float64:
 		return uint64(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
 			if err != nil {
@@ -759,6 +769,7 @@ func (v Value) Float32() (float32, error) {
 	case float64:
 		return float32(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		parsed, err := strconv.ParseFloat(typed, 32)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Float32: %w", typed, err)
@@ -824,6 +835,7 @@ func (v Value) Float64() (float64, error) {
 	case float32:
 		return float64(typed), nil
 	case string:
+		typed = strings.TrimSpace(typed)
 		parsed, err := strconv.ParseFloat(typed, 64)
 		if err != nil {
 			return 0, fmt.Errorf("dataparse: error parsing %q as Float64: %w", typed, err)
