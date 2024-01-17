@@ -38,12 +38,17 @@ var ParseTimeFormats = []string{
 
 // ParseTime attempts to parse s as time utilizing all formats in
 // ParseTimeFormats.
+// An empty string will return a default time.Time.
 func ParseTime(s string) (time.Time, error) {
+	if s == "" {
+		return time.Time{}, nil
+	}
+
 	for _, format := range ParseTimeFormats {
 		t, err := time.Parse(format, s)
 		if err == nil {
 			return t, nil
 		}
 	}
-	return time.Time{}, fmt.Errorf("dataparse: no format produced a valid time.Time")
+	return time.Time{}, fmt.Errorf("dataparse: no format produced a valid time.Time from %q", s)
 }
