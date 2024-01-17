@@ -33,6 +33,10 @@ func TestValue_Int(t *testing.T) {
 	require.Nil(t, err)
 	assert.Equal(t, 123, parsed)
 
+	parsed, err = NewValue("").Int()
+	require.Nil(t, err)
+	assert.Equal(t, 0, parsed)
+
 	parsed, err = NewValue(0).Int()
 	require.Nil(t, err)
 	assert.Equal(t, 0, parsed)

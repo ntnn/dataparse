@@ -12,6 +12,9 @@ func (v Value) {{.Name}}() ({{.Datatype}}, error) {
 	{{ end -}}
 	case string:
 		typed = strings.TrimSpace(typed)
+		if typed == "" {
+			return {{.Default}}, nil
+		}
 		{{ if not (hasPrefix .Datatype "float") -}}
 		if strings.Contains(typed, ".") {
 			parsed, err := strconv.ParseFloat(typed, 64)
