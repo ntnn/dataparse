@@ -170,4 +170,41 @@ func TestValue_List(t *testing.T) {
 		},
 		v,
 	)
+
+	v, err = NewValue("1,2,3").List()
+	assert.Nil(t, err)
+	assert.Equal(t,
+		[]Value{
+			Value{Data: "1"},
+			Value{Data: "2"},
+			Value{Data: "3"},
+		},
+		v,
+	)
+	assert.Equal(t, 1, v[0].MustInt())
+	assert.Equal(t, 2, v[1].MustInt())
+	assert.Equal(t, 3, v[2].MustInt())
+
+	v, err = NewValue("one,two,three").List()
+	assert.Nil(t, err)
+	assert.Equal(t,
+		[]Value{
+			Value{Data: "one"},
+			Value{Data: "two"},
+			Value{Data: "three"},
+		},
+		v,
+	)
+
+	v, err = NewValue("one\ntwo\nthree").List()
+	assert.Nil(t, err)
+	assert.Equal(t,
+		[]Value{
+			Value{Data: "one"},
+			Value{Data: "two"},
+			Value{Data: "three"},
+		},
+		v,
+	)
+
 }

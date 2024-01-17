@@ -35,14 +35,21 @@ func (v Value) TrimString() string {
 	return strings.TrimSpace(v.MustString())
 }
 
+// DefaultStringSeparators is used when no separators are passed,
+var DefaultStringSeparators = []string{
+	",",
+	"\n",
+}
+
 // ListString returns the underlying data as a slice of strings.
 //
 // If the underlying data is a slice each member is transformed into
 // a string using the Value.String method.
 //
 // If the underlying data is a string the string is split using the
-// passed separator.
-func (v Value) ListString(sep string) ([]string, error) {
+// passed separator. If not separators are passed
+// DefaultStringSeparators is used.
+func (v Value) ListString(seps ...string) ([]string, error) {
 	val := reflect.ValueOf(v.Data)
 	switch val.Kind() {
 	case reflect.Slice:
@@ -60,7 +67,24 @@ func (v Value) ListString(sep string) ([]string, error) {
 		if err != nil {
 			return nil, fmt.Errorf("dataparse: error turning %q into string to split: %w", v.Data, err)
 		}
-		return strings.Split(s, sep), nil
+
+		if len(seps) == 0 {
+			seps = DefaultStringSeparators
+		}
+
+		for _, sep := range seps {
+			split := strings.Split(s, sep)
+			if len(split) == 1 {
+				// walk through separators until more than one element
+				// is present
+				continue
+			}
+			return split, nil
+		}
+
+		// default to returning the singular element if no separator
+		// split the element.
+		return []string{s}, nil
 	}
 }
 

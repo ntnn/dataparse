@@ -153,14 +153,27 @@ func (v Value) To(other any, opts ...ToOption) error {
 
 // List returns the underlying data as a slice of Values.
 //
+// The passed separators are passed to .ListString if the underlying
+// value is a string.
+//
 // Warning: This method is very simplistic and at the moment only
 // returns a proper slice of values if the underlying data is a slice.
-func (v Value) List() ([]Value, error) {
+func (v Value) List(seps ...string) ([]Value, error) {
 	if v.Data == nil {
 		return []Value{}, ErrValueIsNil
 	}
 
 	switch reflect.TypeOf(v.Data).Kind() {
+	case reflect.String:
+		s, err := v.ListString(seps...)
+		if err != nil {
+			return nil, err
+		}
+		vs := make([]Value, len(s))
+		for i := range s {
+			vs[i] = NewValue(s[i])
+		}
+		return vs, nil
 	case reflect.Slice:
 		l := reflect.ValueOf(v.Data)
 		ret := make([]Value, l.Len())
