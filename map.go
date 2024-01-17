@@ -421,6 +421,7 @@ type toConfig struct {
 	lookupFieldName       bool
 	skipFieldsWithoutTag  bool
 	ignoreNoValidKeyError bool
+	collectErrors         bool
 }
 
 func newToConfig() *toConfig {
@@ -471,6 +472,19 @@ func WithIgnoreNoValidKeyError() ToOption {
 	}
 }
 
+// WithCollectErrors configures Map.To to not return on the first
+// encountered error when processing properties.
+//
+// Instead occurring errors are collected with errors.Join and returned
+// after processing all fields.
+//
+// The default is false.
+func WithCollectErrors() ToOption {
+	return func(cfg *toConfig) {
+		cfg.collectErrors = true
+	}
+}
+
 // To reads the map into a struct similar to json.Unmarshal, utilizing Value.To.
 // The passed variable must be a pointer to a struct.
 //
@@ -518,6 +532,7 @@ func (m Map) To(dest any, opts ...ToOption) error {
 	}
 
 	refT := refV.Type()
+	var errs error
 
 	for i := 0; i < refT.NumField(); i++ {
 		fieldRefT := refT.Field(i)
@@ -542,8 +557,13 @@ func (m Map) To(dest any, opts ...ToOption) error {
 		}
 
 		if len(lookupKeys) == 0 {
-			return fmt.Errorf("dataparse: no keys found to lookup for field %q, this error can be prevented by passing WithSkipFieldsWithoutTag",
+			err := fmt.Errorf("dataparse: no keys found to lookup for field %q, this error can be prevented by passing WithSkipFieldsWithoutTag",
 				fieldRefT.Name)
+			if !cfg.collectErrors {
+				return err
+			}
+			errs = errors.Join(errs, err)
+			continue
 		}
 
 		v, err := m.Get(lookupKeys...)
@@ -551,20 +571,34 @@ func (m Map) To(dest any, opts ...ToOption) error {
 			if cfg.ignoreNoValidKeyError && errors.As(err, &ErrNoValidKey{}) {
 				continue
 			}
-			return fmt.Errorf("dataparse: error getting field %q from map: %w",
+			err := fmt.Errorf("dataparse: error getting field %q from map: %w",
 				fieldRefT.Name, err)
+			if !cfg.collectErrors {
+				return err
+			}
+			errs = errors.Join(errs, err)
+			continue
 		}
 
 		fieldRefV := refV.Field(i)
 		if !fieldRefV.CanAddr() {
-			return fmt.Errorf("dataparse: field %q is not addressable", fieldRefT.Name)
+			err := fmt.Errorf("dataparse: field %q is not addressable", fieldRefT.Name)
+			if !cfg.collectErrors {
+				return err
+			}
+			errs = errors.Join(errs, err)
+			continue
 		}
 
 		if err := v.To(fieldRefV.Addr().Interface(), opts...); err != nil {
-			return fmt.Errorf("dataparse: error setting field %q from value %v: %w",
+			err := fmt.Errorf("dataparse: error setting field %q from value %v: %w",
 				fieldRefT.Name, v, err)
+			if !cfg.collectErrors {
+				return err
+			}
+			errs = errors.Join(errs, err)
 		}
 	}
 
-	return nil
+	return errs
 }
