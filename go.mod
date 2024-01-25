@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/brianvoe/gofakeit/v6 v6.23.1
 	github.com/google/gofuzz v1.2.0
-	github.com/k0kubun/pp/v3 v3.2.0
+	github.com/lib/pq v1.10.9
 	github.com/ntnn/magefiles v0.0.0-20230815005257-6d6ee99a4e10
 	github.com/stretchr/testify v1.8.4
 )

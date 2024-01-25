@@ -432,6 +432,14 @@ func newToConfig() *toConfig {
 
 type ToOption func(*toConfig)
 
+func cfgFromOpts(opts ...ToOption) *toConfig {
+	cfg := newToConfig()
+	for _, opt := range opts {
+		opt(cfg)
+	}
+	return cfg
+}
+
 // WithLookupFieldName configures Map.To to try to lookup the field name
 // in addition to any names given in the dataparse tag.
 //
@@ -513,10 +521,7 @@ func WithCollectErrors() ToOption {
 // E.g. if the field type is string and the map contains a number the
 // field will contain a string with the number formatted in.
 func (m Map) To(dest any, opts ...ToOption) error {
-	cfg := newToConfig()
-	for _, opt := range opts {
-		opt(cfg)
-	}
+	cfg := cfgFromOpts(opts...)
 
 	refV := reflect.ValueOf(dest)
 	if refV.Kind() != reflect.Pointer {
