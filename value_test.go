@@ -131,21 +131,35 @@ func TestValue_To(t *testing.T) {
 
 func TestValue_To_Slice(t *testing.T) {
 	v := NewValue([]int{1, 2, 3})
-	s := []int{}
+	target1 := []int{}
 
-	require.Nil(t, v.To(&s))
-	require.Equal(t, 3, len(s))
-	assert.Equal(t, 2, s[1])
+	require.Nil(t, v.To(&target1))
+	require.Equal(t, 3, len(target1))
+	assert.Equal(t, 2, target1[1])
+
+	v = NewValue("a single string")
+	target2 := []string{}
+	require.Nil(t, v.To(&target2))
+	require.Equal(t, 1, len(target2))
+	assert.Equal(t, "a single string", target2[0])
 }
 
 func TestValue_To_PtrSlice(t *testing.T) {
 	v := NewValue([]int{1, 2, 3})
-	s := []int{}
-	sPtr := &s
+	target1 := []int{}
+	target1Ptr := &target1
 
-	require.Nil(t, v.To(&sPtr))
-	require.Equal(t, 3, len(s))
-	assert.Equal(t, 2, s[1])
+	require.Nil(t, v.To(&target1Ptr))
+	require.Equal(t, 3, len(target1))
+	assert.Equal(t, 2, target1[1])
+
+	v = NewValue("a single string")
+	target2 := []string{}
+	target2Ptr := &target2
+
+	require.Nil(t, v.To(&target2Ptr))
+	require.Equal(t, 1, len(target2))
+	assert.Equal(t, "a single string", target2[0])
 }
 
 func TestValue_List(t *testing.T) {
