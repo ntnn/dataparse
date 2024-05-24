@@ -7,8 +7,7 @@ import (
 )
 
 type fromConfig struct {
-	channelSize    int
-	errChannelSize int
+	channelSize int
 
 	separator string
 	trimSpace bool
@@ -16,21 +15,15 @@ type fromConfig struct {
 
 	reader  io.Reader
 	closers []func() error
-
-	// Not something that necessarily needs to be done but allows for
-	// an easy cleanup with one call to .Close.
-	mapCh chan Map
-	errCh chan error
 }
 
 func newFromConfig(opts ...FromOption) *fromConfig {
 	cfg := &fromConfig{
-		channelSize:    100,
-		errChannelSize: 1,
-		separator:      ",",
-		trimSpace:      true,
-		headers:        []string{},
-		closers:        []func() error{},
+		channelSize: 100,
+		separator:   ",",
+		trimSpace:   true,
+		headers:     []string{},
+		closers:     []func() error{},
 	}
 
 	for _, opt := range opts {
@@ -40,20 +33,7 @@ func newFromConfig(opts ...FromOption) *fromConfig {
 	return cfg
 }
 
-func (cfg *fromConfig) channels() (chan Map, chan error) {
-	cfg.mapCh = make(chan Map, cfg.channelSize)
-	cfg.errCh = make(chan error, cfg.errChannelSize)
-	return cfg.mapCh, cfg.errCh
-}
-
 func (cfg fromConfig) Close() error {
-	if cfg.mapCh != nil {
-		close(cfg.mapCh)
-	}
-	if cfg.errCh != nil {
-		close(cfg.errCh)
-	}
-
 	var retErr error
 	slices.Reverse(cfg.closers)
 	for _, closer := range cfg.closers {
@@ -72,15 +52,6 @@ type FromOption func(*fromConfig)
 func WithChannelSize(i int) FromOption {
 	return func(opt *fromConfig) {
 		opt.channelSize = i
-	}
-}
-
-// WithErrChannelSize defines the buffer size of error channels for
-// functions returning error channels.
-// Defaults to 1.
-func WithErrChannelSize(i int) FromOption {
-	return func(opt *fromConfig) {
-		opt.errChannelSize = i
 	}
 }
 

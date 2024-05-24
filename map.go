@@ -19,6 +19,11 @@ import (
 // It is used to store and retrieve data taken from various sources.
 type Map map[any]any
 
+type FromResult struct {
+	Map Map
+	Err error
+}
+
 // From returns maps parsed from a file.
 //
 // From utilizes other functions for various data types like JSON and
@@ -27,13 +32,13 @@ type Map map[any]any
 // From automatically unpacks the following archives based on their file
 // extension:
 //   - gzip: .gz
-func From(path string, opts ...FromOption) (chan Map, chan error, error) {
+func From(path string, opts ...FromOption) (chan FromResult, error) {
 	cfg := newFromConfig(opts...)
 	defer cfg.Close()
 
 	reader, err := os.Open(path)
 	if err != nil {
-		return nil, nil, fmt.Errorf("dataparse: error opening file: %w", err)
+		return nil, fmt.Errorf("dataparse: error opening file: %w", err)
 	}
 	cfg.reader = reader
 	cfg.closers = append(cfg.closers, reader.Close)
@@ -44,7 +49,7 @@ func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 	case ".gz":
 		gzReader, err := gzip.NewReader(reader)
 		if err != nil {
-			return nil, nil, fmt.Errorf("dataparse: error creating gzip reader: %w", err)
+			return nil, fmt.Errorf("dataparse: error creating gzip reader: %w", err)
 		}
 		cfg.reader = gzReader
 		cfg.closers = append(cfg.closers, gzReader.Close)
@@ -54,7 +59,7 @@ func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 		ext = filepath.Ext(strings.TrimSuffix(path, filepath.Ext(path)))
 	}
 
-	var fn func(cfg *fromConfig) (chan Map, chan error)
+	var fn func(cfg *fromConfig) chan FromResult
 	switch ext {
 	case ".json", ".ndjson":
 		fn = fromJson
@@ -66,11 +71,10 @@ func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 		cfg.separator = c2.separator
 		fn = fromCsv
 	default:
-		return nil, nil, fmt.Errorf("dataparse: unhandled file extension: %q", ext)
+		return nil, fmt.Errorf("dataparse: unhandled file extension: %q", ext)
 	}
 
-	chMap, chErr := fn(cfg)
-	return chMap, chErr, nil
+	return fn(cfg), nil
 }
 
 // FromSingle is a wrapper around From and returns the first map and
@@ -78,18 +82,19 @@ func From(path string, opts ...FromOption) (chan Map, chan error, error) {
 // It is only intended for instances where it is already known that the
 // input can only contain a single document.
 func FromSingle(path string, opts ...FromOption) (Map, error) {
-	chMap, chErr, err := From(path, append(opts, WithChannelSize(1))...)
+	ch, err := From(path, append(opts, WithChannelSize(1))...)
 	if err != nil {
 		return nil, err
 	}
-	return <-chMap, <-chErr
+	elem := <-ch
+	return elem.Map, elem.Err
 }
 
 // FromJson returns maps parsed from a stream which may consist of:
 // 1. A single JSON document
 // 2. A stream of JSON documents
 // 3. An array of JSON documents
-func FromJson(reader io.Reader, opts ...FromOption) (chan Map, chan error) {
+func FromJson(reader io.Reader, opts ...FromOption) chan FromResult {
 	cfg := newFromConfig(opts...)
 	cfg.reader = reader
 	return fromJson(cfg)
@@ -100,23 +105,24 @@ func FromJson(reader io.Reader, opts ...FromOption) (chan Map, chan error) {
 // It is only intended for instances where it is already known that the
 // input can only contain a single document.
 func FromJsonSingle(reader io.Reader, opts ...FromOption) (Map, error) {
-	mapCh, mapErr := FromJson(reader, append(opts, WithChannelSize(1))...)
-	return <-mapCh, <-mapErr
+	elem := <-FromJson(reader, append(opts, WithChannelSize(1))...)
+	return elem.Map, elem.Err
 }
 
-func fromJson(cfg *fromConfig) (chan Map, chan error) {
-	mapCh, errCh := cfg.channels()
+func fromJson(cfg *fromConfig) chan FromResult {
+	ch := make(chan FromResult, cfg.channelSize)
 
 	decoder := json.NewDecoder(cfg.reader)
 
 	go func() {
 		defer cfg.Close()
+		defer close(ch)
 
 		for decoder.More() {
 			// decoder refuses to decode into Map or map[any]any
 			var m any
 			if err := decoder.Decode(&m); err != nil && !errors.Is(err, io.EOF) {
-				errCh <- err
+				ch <- FromResult{Err: err}
 				return
 			}
 			val := reflect.ValueOf(m)
@@ -125,42 +131,43 @@ func fromJson(cfg *fromConfig) (chan Map, chan error) {
 				for i := 0; i < val.Len(); i++ {
 					elem, err := NewMap(val.Index(i).Interface())
 					if err != nil {
-						errCh <- fmt.Errorf("dataparse: error parsing element %d: %w", i, err)
+						ch <- FromResult{Err: fmt.Errorf("dataparse: error parsing element %d: %w", i, err)}
 						return
 					}
-					mapCh <- elem
+					ch <- FromResult{Map: elem}
 				}
 			case reflect.Struct, reflect.Map:
 				mMap, err := NewMap(m)
 				if err != nil {
-					errCh <- err
+					ch <- FromResult{Err: err}
 					return
 				}
-				mapCh <- mMap
+				ch <- FromResult{Map: mMap}
 			default:
-				errCh <- fmt.Errorf("dataparse: unhandled type %q in file", val.Kind())
+				ch <- FromResult{Err: fmt.Errorf("dataparse: unhandled type %q in file", val.Kind())}
 				return
 			}
 		}
 	}()
 
-	return mapCh, errCh
+	return ch
 }
 
 // FromCsv returns maps read from a CSV stream.
-func FromCsv(reader io.Reader, opts ...FromOption) (chan Map, chan error) {
+func FromCsv(reader io.Reader, opts ...FromOption) chan FromResult {
 	cfg := newFromConfig(opts...)
 	cfg.reader = reader
 	return fromCsv(cfg)
 }
 
-func fromCsv(cfg *fromConfig) (chan Map, chan error) {
-	mapCh, errCh := cfg.channels()
+func fromCsv(cfg *fromConfig) chan FromResult {
+	ch := make(chan FromResult, cfg.channelSize)
 
 	if len(cfg.separator) != 1 {
 		defer cfg.Close()
-		errCh <- fmt.Errorf("dataparse: separator must be a string of length one for csv, got %q", cfg.separator)
-		return mapCh, errCh
+		defer close(ch)
+		ch <- FromResult{Err: fmt.Errorf("dataparse: separator must be a string of length one for csv, got %q", cfg.separator)}
+		return ch
 	}
 
 	reader := csv.NewReader(cfg.reader)
@@ -171,11 +178,12 @@ func fromCsv(cfg *fromConfig) (chan Map, chan error) {
 
 	go func() {
 		defer cfg.Close()
+		defer close(ch)
 
 		if len(cfg.headers) == 0 {
 			h, err := reader.Read()
 			if err != nil {
-				errCh <- err
+				ch <- FromResult{Err: err}
 				return
 			}
 			cfg.headers = h
@@ -187,7 +195,7 @@ func fromCsv(cfg *fromConfig) (chan Map, chan error) {
 				if errors.Is(err, io.EOF) {
 					return
 				}
-				errCh <- err
+				ch <- FromResult{Err: err}
 				return
 			}
 
@@ -195,11 +203,11 @@ func fromCsv(cfg *fromConfig) (chan Map, chan error) {
 			for i := range elems {
 				m[cfg.headers[i]] = elems[i]
 			}
-			mapCh <- m
+			ch <- FromResult{Map: m}
 		}
 	}()
 
-	return mapCh, errCh
+	return ch
 }
 
 // FromKVString returns a map based on the passed string.

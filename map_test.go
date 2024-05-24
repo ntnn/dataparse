@@ -13,36 +13,38 @@ import (
 )
 
 func TestFrom_Json(t *testing.T) {
-	maps, errs, err := From("./testdata/data.json")
+	maps, err := From("./testdata/data.json")
 	require.Nil(t, err)
-	for err := range errs {
-		require.Nil(t, err)
-	}
 
 	m := <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Garrott", m.MustGet("first_name").MustString())
+	require.Nil(t, m.Err)
+	assert.Equal(t, "Garrott", m.Map.MustGet("first_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Vasovic", m.MustGet("last_name").MustString())
+	require.Nil(t, m.Err)
+	assert.Equal(t, "Vasovic", m.Map.MustGet("last_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, 3, m.MustGet("id").MustInt())
+	require.Nil(t, m.Err)
+	assert.Equal(t, 3, m.Map.MustGet("id").MustInt())
 
 	m = <-maps
 	require.NotNil(t, m)
+	require.Nil(t, m.Err)
 	assert.Equal(t,
 		time.Date(2023, time.June, 20, 23, 34, 57, 0, time.UTC),
-		m.MustGet("timestamp").MustTime(),
+		m.Map.MustGet("timestamp").MustTime(),
 	)
 
 	m = <-maps
 	require.NotNil(t, m)
+	require.Nil(t, m.Err)
 	assert.Equal(t,
 		net.ParseIP("166.215.142.79"),
-		m.MustGet("ip_address").MustIP(),
+		m.Map.MustGet("ip_address").MustIP(),
 	)
 }
 
@@ -74,36 +76,38 @@ func gzipFile(t *testing.T, target string) {
 func TestFrom_JsonGz(t *testing.T) {
 	gzipFile(t, "./testdata/data.json")
 
-	maps, errs, err := From("./testdata/data.json.gz")
+	maps, err := From("./testdata/data.json.gz")
 	require.Nil(t, err)
-	for err := range errs {
-		require.Nil(t, err)
-	}
 
 	m := <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Garrott", m.MustGet("first_name").MustString())
+	require.Nil(t, m.Err)
+	assert.Equal(t, "Garrott", m.Map.MustGet("first_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Vasovic", m.MustGet("last_name").MustString())
+	require.Nil(t, m.Err)
+	assert.Equal(t, "Vasovic", m.Map.MustGet("last_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, 3, m.MustGet("id").MustInt())
+	require.Nil(t, m.Err)
+	assert.Equal(t, 3, m.Map.MustGet("id").MustInt())
 
 	m = <-maps
 	require.NotNil(t, m)
+	require.Nil(t, m.Err)
 	assert.Equal(t,
 		time.Date(2023, time.June, 20, 23, 34, 57, 0, time.UTC),
-		m.MustGet("timestamp").MustTime(),
+		m.Map.MustGet("timestamp").MustTime(),
 	)
 
 	m = <-maps
 	require.NotNil(t, m)
+	require.Nil(t, m.Err)
 	assert.Equal(t,
 		net.ParseIP("166.215.142.79"),
-		m.MustGet("ip_address").MustIP(),
+		m.Map.MustGet("ip_address").MustIP(),
 	)
 }
 
@@ -128,70 +132,74 @@ func TestFromSingle_Json(t *testing.T) {
 }
 
 func TestFrom_Ndjson(t *testing.T) {
-	maps, errs, err := From("./testdata/data.ndjson")
+	maps, err := From("./testdata/data.ndjson")
 	require.Nil(t, err)
-	for err := range errs {
-		require.Nil(t, err)
-	}
 
 	m := <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Garrott", m.MustGet("first_name").MustString())
+	require.Nil(t, m.Err)
+	assert.Equal(t, "Garrott", m.Map.MustGet("first_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Vasovic", m.MustGet("last_name").MustString())
+	require.Nil(t, m.Err)
+	assert.Equal(t, "Vasovic", m.Map.MustGet("last_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, 3, m.MustGet("id").MustInt())
+	require.Nil(t, m.Err)
+	assert.Equal(t, 3, m.Map.MustGet("id").MustInt())
 
 	m = <-maps
 	require.NotNil(t, m)
+	require.Nil(t, m.Err)
 	assert.Equal(t,
 		time.Date(2023, time.June, 20, 23, 34, 57, 0, time.UTC),
-		m.MustGet("timestamp").MustTime(),
+		m.Map.MustGet("timestamp").MustTime(),
 	)
 
 	m = <-maps
 	require.NotNil(t, m)
+	require.Nil(t, m.Err)
 	assert.Equal(t,
 		net.ParseIP("166.215.142.79"),
-		m.MustGet("ip_address").MustIP(),
+		m.Map.MustGet("ip_address").MustIP(),
 	)
 }
 
 func TestFrom_Csv(t *testing.T) {
-	maps, errs, err := From("./testdata/data.csv")
+	maps, err := From("./testdata/data.csv")
 	require.Nil(t, err)
-	for err := range errs {
-		require.Nil(t, err)
-	}
 
 	m := <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Robbie", m.MustGet("first_name").MustString())
+	require.Nil(t, m.Err)
+	assert.Equal(t, "Robbie", m.Map.MustGet("first_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, "Salvin", m.MustGet("last_name").MustString())
+	require.Nil(t, m.Err)
+	assert.Equal(t, "Salvin", m.Map.MustGet("last_name").MustString())
 
 	m = <-maps
 	require.NotNil(t, m)
-	assert.Equal(t, 3, m.MustGet("id").MustInt())
+	require.Nil(t, m.Err)
+	assert.Equal(t, 3, m.Map.MustGet("id").MustInt())
 
 	m = <-maps
 	require.NotNil(t, m)
+	require.Nil(t, m.Err)
 	assert.Equal(t,
 		time.Date(2023, time.June, 26, 7, 22, 35, 0, time.UTC),
-		m.MustGet("timestamp").MustTime(),
+		m.Map.MustGet("timestamp").MustTime(),
 	)
 
 	m = <-maps
 	require.NotNil(t, m)
+	require.Nil(t, m.Err)
 	assert.Equal(t,
 		net.ParseIP("56.85.108.10"),
-		m.MustGet("ip_address").MustIP(),
+		m.Map.MustGet("ip_address").MustIP(),
 	)
 }
 
