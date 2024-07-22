@@ -221,12 +221,12 @@ func (v Value) MustList() []Value {
 }
 
 // Map returns the underlying data as a Map.
-func (v Value) Map() (Map, error) {
+func (v Value) Map() (*Map, error) {
 	return NewMap(v.Data)
 }
 
 // MustMap is the error-ignoring version of Map.
-func (v Value) MustMap() Map {
+func (v Value) MustMap() *Map {
 	m, _ := v.Map()
 	return m
 }

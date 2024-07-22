@@ -17,10 +17,13 @@ import (
 
 // Map is one of the two central types in dataparse.
 // It is used to store and retrieve data taken from various sources.
-type Map map[any]any
+type Map struct {
+	Data map[any]any
+	cfg  *fromConfig
+}
 
 type FromResult struct {
-	Map Map
+	Map *Map
 	Err error
 }
 
@@ -81,7 +84,7 @@ func From(path string, opts ...FromOption) (chan FromResult, error) {
 // error in the result set.
 // It is only intended for instances where it is already known that the
 // input can only contain a single document.
-func FromSingle(path string, opts ...FromOption) (Map, error) {
+func FromSingle(path string, opts ...FromOption) (*Map, error) {
 	ch, err := From(path, append(opts, WithChannelSize(1))...)
 	if err != nil {
 		return nil, err
@@ -104,7 +107,7 @@ func FromJson(reader io.Reader, opts ...FromOption) chan FromResult {
 // and error in the result set.
 // It is only intended for instances where it is already known that the
 // input can only contain a single document.
-func FromJsonSingle(reader io.Reader, opts ...FromOption) (Map, error) {
+func FromJsonSingle(reader io.Reader, opts ...FromOption) (*Map, error) {
 	elem := <-FromJson(reader, append(opts, WithChannelSize(1))...)
 	return elem.Map, elem.Err
 }
@@ -199,9 +202,9 @@ func fromCsv(cfg *fromConfig) chan FromResult {
 				return
 			}
 
-			m := Map{}
+			m := NewEmptyMap()
 			for i := range elems {
-				m[cfg.headers[i]] = elems[i]
+				m.Data[cfg.headers[i]] = elems[i]
 			}
 			ch <- FromResult{Map: m}
 		}
@@ -220,10 +223,10 @@ func fromCsv(cfg *fromConfig) chan FromResult {
 //		b: "test",
 //		c: nil,
 //	}
-func FromKVString(kv string, opts ...FromOption) (Map, error) {
+func FromKVString(kv string, opts ...FromOption) (*Map, error) {
 	cfg := newFromConfig(opts...)
 
-	m := Map{}
+	m := NewEmptyMap(opts...)
 	for _, elem := range strings.Split(kv, cfg.separator) {
 		split := strings.SplitN(elem, "=", 2)
 
@@ -237,17 +240,27 @@ func FromKVString(kv string, opts ...FromOption) (Map, error) {
 			}
 		}
 
-		m[key] = value
+		m.Data[key] = value
 	}
 
 	return m, nil
 }
 
+// NewEmptyMap returns an empty initialized map.
+func NewEmptyMap(opts ...FromOption) *Map {
+	return &Map{
+		Data: map[any]any{},
+		cfg:  newFromConfig(opts...),
+	}
+}
+
 // NewMap creates a map from the passed value.
 // Valid values are maps and structs.
-func NewMap(in any) (Map, error) {
+func NewMap(in any, opts ...FromOption) (*Map, error) {
+	m := NewEmptyMap()
+
 	if in == nil {
-		return Map{}, ErrValueIsNil
+		return m, ErrValueIsNil
 	}
 
 	val := reflect.ValueOf(in)
@@ -257,23 +270,21 @@ func NewMap(in any) (Map, error) {
 
 	switch val.Kind() {
 	case reflect.Map:
-		m := Map{}
 		iter := val.MapRange()
 		for iter.Next() {
-			m[iter.Key().Interface()] = iter.Value().Interface()
+			m.Data[iter.Key().Interface()] = iter.Value().Interface()
 		}
 		return m, nil
 	case reflect.Struct:
-		m := Map{}
 		for i := 0; i < val.NumField(); i++ {
 			field := val.Field(i)
 			if field.CanInterface() {
-				m[val.Type().Field(i).Name] = field.Interface()
+				m.Data[val.Type().Field(i).Name] = field.Interface()
 			}
 		}
 		return m, nil
 	default:
-		return Map{}, fmt.Errorf("dataparse: cannot be transformed to map: %T", in)
+		return nil, fmt.Errorf("dataparse: cannot be transformed to map: %T", in)
 	}
 }
 
@@ -358,7 +369,7 @@ func (m Map) Get(keys ...any) (Value, error) {
 			return v, nil
 		}
 
-		if v, ok := m[key]; ok {
+		if v, ok := m.Data[key]; ok {
 			return NewValue(v), nil
 		}
 	}
@@ -378,7 +389,7 @@ func (m Map) get(key any) (bool, Value, error) {
 				)
 			}
 
-			v, ok := m[splitKey[0]]
+			v, ok := m.Data[splitKey[0]]
 			if !ok {
 				return false, NewValue(nil), nil
 			}
@@ -410,17 +421,17 @@ func (m Map) MustGet(keys ...any) Value {
 }
 
 // Map works like Get but returns a Map.
-func (m Map) Map(keys ...any) (Map, error) {
+func (m Map) Map(keys ...any) (*Map, error) {
 	for _, key := range keys {
-		if v, ok := m[key]; ok {
+		if v, ok := m.Data[key]; ok {
 			return NewMap(v)
 		}
 	}
-	return Map{}, fmt.Errorf("dataparse: no valid keys: %v", keys)
+	return nil, fmt.Errorf("dataparse: no valid keys: %v", keys)
 }
 
 // MustMap is the error-ignoring version of Map.
-func (m Map) MustMap(keys ...any) Map {
+func (m Map) MustMap(keys ...any) *Map {
 	v, _ := m.Map(keys...)
 	return v
 }
