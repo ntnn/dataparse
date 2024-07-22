@@ -60,6 +60,9 @@ func (v Value) ListString(seps ...string) ([]string, error) {
 				elem = elem.Elem()
 			}
 			ret[i] = NewValue(elem.Interface()).MustString()
+			if v.cfg.trimSpace {
+				ret[i] = strings.TrimSpace(ret[i])
+			}
 		}
 		return ret, nil
 	default:
@@ -74,6 +77,11 @@ func (v Value) ListString(seps ...string) ([]string, error) {
 
 		for _, sep := range seps {
 			split := strings.Split(s, sep)
+			if v.cfg.trimSpace {
+				for i := range split {
+					split[i] = strings.TrimSpace(split[i])
+				}
+			}
 			if len(split) == 1 {
 				// walk through separators until more than one element
 				// is present

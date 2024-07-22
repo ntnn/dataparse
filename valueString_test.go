@@ -56,7 +56,7 @@ func TestValue_ListString(t *testing.T) {
 
 	s, err = NewValue("test1 |test2").ListString("|")
 	assert.Nil(t, err)
-	assert.Equal(t, []string{"test1 ", "test2"}, s)
+	assert.Equal(t, []string{"test1", "test2"}, s)
 
 	// integer to string
 	s, err = NewValue(1).ListString(",")
