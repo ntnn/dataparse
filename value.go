@@ -11,11 +11,15 @@ import (
 // It is used to transform data between various representations.
 type Value struct {
 	Data any
+	cfg  *fromConfig
 }
 
 // NewValue returns the passed data as a Value.
-func NewValue(data any) Value {
-	return Value{Data: data}
+func NewValue(data any, opts ...FromOption) Value {
+	return Value{
+		Data: data,
+		cfg:  newFromConfig(opts...),
+	}
 }
 
 //go:generate go run ./cmd/gen-value-numbers

@@ -163,13 +163,15 @@ func TestValue_To_PtrSlice(t *testing.T) {
 }
 
 func TestValue_List(t *testing.T) {
+	cfg := newFromConfig()
+
 	v, err := NewValue([]int{1, 2, 3}).List()
 	assert.Nil(t, err)
 	assert.Equal(t,
 		[]Value{
-			Value{Data: 1},
-			Value{Data: 2},
-			Value{Data: 3},
+			Value{Data: 1, cfg: cfg},
+			Value{Data: 2, cfg: cfg},
+			Value{Data: 3, cfg: cfg},
 		},
 		v,
 	)
@@ -178,9 +180,9 @@ func TestValue_List(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t,
 		[]Value{
-			Value{Data: 1},
-			Value{Data: "test"},
-			Value{Data: 3.56},
+			Value{Data: 1, cfg: cfg},
+			Value{Data: "test", cfg: cfg},
+			Value{Data: 3.56, cfg: cfg},
 		},
 		v,
 	)
@@ -189,9 +191,9 @@ func TestValue_List(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t,
 		[]Value{
-			Value{Data: "1"},
-			Value{Data: "2"},
-			Value{Data: "3"},
+			Value{Data: "1", cfg: cfg},
+			Value{Data: "2", cfg: cfg},
+			Value{Data: "3", cfg: cfg},
 		},
 		v,
 	)
@@ -203,9 +205,9 @@ func TestValue_List(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t,
 		[]Value{
-			Value{Data: "one"},
-			Value{Data: "two"},
-			Value{Data: "three"},
+			Value{Data: "one", cfg: cfg},
+			Value{Data: "two", cfg: cfg},
+			Value{Data: "three", cfg: cfg},
 		},
 		v,
 	)
@@ -214,9 +216,9 @@ func TestValue_List(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t,
 		[]Value{
-			Value{Data: "one"},
-			Value{Data: "two"},
-			Value{Data: "three"},
+			Value{Data: "one", cfg: cfg},
+			Value{Data: "two", cfg: cfg},
+			Value{Data: "three", cfg: cfg},
 		},
 		v,
 	)
