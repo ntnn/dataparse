@@ -427,7 +427,7 @@ func (m Map) Map(keys ...any) (*Map, error) {
 			return NewMap(v)
 		}
 	}
-	return nil, fmt.Errorf("dataparse: no valid keys: %v", keys)
+	return NewEmptyMap(), fmt.Errorf("dataparse: no valid keys: %v", keys)
 }
 
 // MustMap is the error-ignoring version of Map.
