@@ -3,7 +3,7 @@ module github.com/ntnn/dataparse
 go 1.21
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.23.1
+	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/google/gofuzz v1.2.0
 	github.com/lib/pq v1.10.9
 	github.com/ntnn/magefiles v0.0.0-20230815005257-6d6ee99a4e10
