@@ -16,4 +16,10 @@ jobs:
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
         with:
           go-version-file: go.mod
-      - run: go run ./mage.go all
+      - run: make generate
+      - run: |
+          if [[ "$(git status --porcelain | wc -l)" -ne 0 ]]; then
+            echo "Generated files are not up to date. Please run 'make generate' and commit the changes."
+            exit 1
+          fi
+      - run: make
