@@ -104,7 +104,7 @@ func TestValue_To(t *testing.T) {
 
 	// test some random types
 	v = NewValue(5)
-	var i int = 0
+	var i = 0
 	require.Nil(t, v.To(&i))
 	assert.Equal(t, 5, i)
 

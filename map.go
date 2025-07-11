@@ -37,7 +37,6 @@ type FromResult struct {
 //   - gzip: .gz
 func From(path string, opts ...FromOption) (chan FromResult, error) {
 	cfg := newFromConfig(opts...)
-	defer cfg.Close()
 
 	reader, err := os.Open(path)
 	if err != nil {
@@ -118,8 +117,12 @@ func fromJson(cfg *fromConfig) chan FromResult {
 	decoder := json.NewDecoder(cfg.reader)
 
 	go func() {
-		defer cfg.Close()
 		defer close(ch)
+		defer func() {
+			if err := cfg.Close(); err != nil {
+				ch <- FromResult{Err: fmt.Errorf("dataparse: error closing reader: %w", err)}
+			}
+		}()
 
 		for decoder.More() {
 			// decoder refuses to decode into Map or map[any]any
@@ -167,8 +170,12 @@ func fromCsv(cfg *fromConfig) chan FromResult {
 	ch := make(chan FromResult, cfg.channelSize)
 
 	if len(cfg.separator) != 1 {
-		defer cfg.Close()
 		defer close(ch)
+		defer func() {
+			if err := cfg.Close(); err != nil {
+				ch <- FromResult{Err: fmt.Errorf("dataparse: error closing reader: %w", err)}
+			}
+		}()
 		ch <- FromResult{Err: fmt.Errorf("dataparse: separator must be a string of length one for csv, got %q", cfg.separator)}
 		return ch
 	}
@@ -180,8 +187,12 @@ func fromCsv(cfg *fromConfig) chan FromResult {
 	reader.TrimLeadingSpace = cfg.trimSpace
 
 	go func() {
-		defer cfg.Close()
 		defer close(ch)
+		defer func() {
+			if err := cfg.Close(); err != nil {
+				ch <- FromResult{Err: fmt.Errorf("dataparse: error closing reader: %w", err)}
+			}
+		}()
 
 		if len(cfg.headers) == 0 {
 			h, err := reader.Read()

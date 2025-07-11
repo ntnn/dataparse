@@ -101,7 +101,11 @@ func numbers() error {
 	if err != nil {
 		return err
 	}
-	defer gen.Close()
+	defer func() {
+		if err := gen.Close(); err != nil {
+			log.Printf("error closing file %s: %v", *fOutput, err)
+		}
+	}()
 
 	if _, err := gen.WriteString(`package dataparse
 

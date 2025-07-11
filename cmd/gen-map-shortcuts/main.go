@@ -95,7 +95,11 @@ func doMain() error {
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer func() {
+		if err := out.Close(); err != nil {
+			log.Printf("error closing file %s: %v", *fOutput, err)
+		}
+	}()
 
 	if _, err := out.WriteString(`package dataparse
 
