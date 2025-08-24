@@ -8,7 +8,7 @@ require (
 	github.com/brianvoe/gofakeit/v7 v7.4.0
 	github.com/google/gofuzz v1.2.0
 	github.com/lib/pq v1.10.9
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 )
 
 require (
