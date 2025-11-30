@@ -5,7 +5,7 @@ go 1.25
 tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 
 require (
-	github.com/brianvoe/gofakeit/v7 v7.11.0
+	github.com/brianvoe/gofakeit/v7 v7.12.0
 	github.com/google/gofuzz v1.2.0
 	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.11.1
