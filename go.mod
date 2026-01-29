@@ -7,7 +7,7 @@ tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 require (
 	github.com/brianvoe/gofakeit/v7 v7.14.0
 	github.com/google/gofuzz v1.2.0
-	github.com/lib/pq v1.11.0
+	github.com/lib/pq v1.11.1
 	github.com/stretchr/testify v1.11.1
 )
 
