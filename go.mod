@@ -2,7 +2,10 @@ module github.com/ntnn/dataparse
 
 go 1.25.0
 
-tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
+tool (
+	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
+	github.com/ntnn/mindl
+)
 
 require (
 	github.com/brianvoe/gofakeit/v7 v7.14.1
@@ -146,6 +149,7 @@ require (
 	github.com/nakabonne/nestif v0.3.1 // indirect
 	github.com/nishanths/exhaustive v0.12.0 // indirect
 	github.com/nishanths/predeclared v0.2.2 // indirect
+	github.com/ntnn/mindl v0.0.0-20260406101522-a15eaf50461b // indirect
 	github.com/nunnatsa/ginkgolinter v0.23.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
