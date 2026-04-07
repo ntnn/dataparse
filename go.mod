@@ -149,7 +149,7 @@ require (
 	github.com/nakabonne/nestif v0.3.1 // indirect
 	github.com/nishanths/exhaustive v0.12.0 // indirect
 	github.com/nishanths/predeclared v0.2.2 // indirect
-	github.com/ntnn/mindl v0.0.0-20260406101522-a15eaf50461b // indirect
+	github.com/ntnn/mindl v0.0.0-20260406120906-f33b3e0ab202 // indirect
 	github.com/nunnatsa/ginkgolinter v0.23.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
