@@ -8,7 +8,7 @@ tool (
 )
 
 require (
-	github.com/brianvoe/gofakeit/v7 v7.15.0
+	github.com/brianvoe/gofakeit/v7 v7.16.0
 	github.com/google/gofuzz v1.2.0
 	github.com/lib/pq v1.12.3
 	github.com/stretchr/testify v1.12.1
